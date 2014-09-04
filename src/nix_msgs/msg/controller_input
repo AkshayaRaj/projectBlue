@@ -1,0 +1,5 @@
+float32 depth_input
+float32 depth_sepoint
+float32 heading_input
+float32 heading_setpoint
+
