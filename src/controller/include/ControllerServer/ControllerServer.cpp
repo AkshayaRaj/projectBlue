@@ -52,6 +52,7 @@ ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
 	ros::Rate r(10);	
 
 	//now modifying the local goal variable according to the goal setpoint message:
+	//forward and sidemove setpoints are relative 
 	goal_.forward_setpoint=goal->forward_setpoint+_forward_input;
 	goal_.sidemode_setpoint=goal->sidemove_setpoint+_sidemove_input;
 	goal_.forward_vel_setpoint=goal->forward_vel_setpoint;
@@ -85,13 +86,13 @@ ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
 		yaw_error=fabs(goal_.heading_setpoint-wrapAngle360(goal_.heading_setpoint,_heading_input));
 		
 
-		if(fabs(goal_.forward_setpoint-_forward_input )<MIN_FORWARD)
+		if(fabs(goal_.forward_setpoint-_forward_input )<MIN_FORWARD && isFwdPos)
 		{
 			isForwardDone=true;
 			ROS_DEBUG("Forward Setpoint Achieved");
 		}
 		
-		if(fabs(goal_.sidemove_setpoint-_sidemove_input)<MIN_SIDEMOVE)
+		if(fabs(goal_.sidemove_setpoint-_sidemove_input)<MIN_SIDEMOVE && isFwdVel)
 		{
 			isSidemoveDone=true;
 			ROS_DEBUG("Sway Setpoint Achieved");
@@ -114,7 +115,7 @@ ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
 		if(isFwdPos)
 			feedback_.forward_error=fabs(goal_.forward_setpoint-_forward_input) ;
 		else if(isFwdVel)
-			feedback_.forward_errot=fabs(goal_.forward_vel_setpoint-_forwatd_vel_input);
+			feedback_.forward_error=fabs(goal_.forward_vel_setpoint-_forwatd_vel_input);
 		feedback_.sidemove_error=fabs(goal_.sidemove_setpoint-_sidemove_input);
 		feedback_.depth_error=fabs(goal_.depth_setpoint-_depth_input);
 		
@@ -185,6 +186,32 @@ ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
 	float ControllerServer::getForwardVel(){
 		return goal_.forward_vel_setpoint;
 	}
+
+void ControllerActionServer::setDispMode(bool isVelSide,bool isVelFwd)
+{
+  if(isVelSide)
+  {
+    isSideVel = true;
+    isSidePos = false;
+  }
+  else
+  {
+    isSidePos = true;
+    isSideVel = false;
+  }
+
+  if(isVelFwd)
+  {
+    isFwdVel = true;
+    isFwdPos = false;
+  }
+  else
+  {
+    isFwdVel = false;
+    isFwdPos = true;
+
+  }
+}
 
 	ControllerServer::~ControllerServer()
 	{

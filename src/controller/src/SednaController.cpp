@@ -10,7 +10,8 @@
 #include <srmauv_msgs/locomation_mode.h>
 #include <std_msgs/Odometry.h>
 #include <dynamic_reconfigure/server.h>
-// take care of generation PID controller configuration of the dynamic server 
+// take care of generation of PID controller configuration of the dynamic server 
+//inlcude the genereation file here
 #include <std_msgs/Float32.h>
 #include <std_msgs/Int16.h>
 #include <Std_msgs/Int8.h>
@@ -24,7 +25,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-
+//this will be calibrated from the sensor
 const static int loop_freq=20;
 const static int PSI30 = 206842;
 const static int PSI100 = 689475;
@@ -105,6 +106,8 @@ int loc_mode_heading[4] = {-400,400,-400,400};
 
 int  manual_speed[6]={0,0,0,0,0,0};
 
+]
+]
 
 //sets the correct actuator models 
 bool locomotion_srv_handler(srmauv_msgs::locomotion_mode::Request &req, 
@@ -148,11 +151,12 @@ bool locomotion_srv_handler(srmauv_msgs::locomotion_mode::Request &req,
 		res.success=false;
 	}
 	current_mode.data=mode;
-	locomotionModePub.publish(current_mode);
+	locomotionModePub.publish(current_mode); //publish the mode we are in
 	return true;
 	
 }
 
+//the controller service call can enable/disable the various PID controllers
 bool controller_srv_handler(srmauv_msgs::set_controller::Request &req){
 	inDepthPID=req.depth;
 	inForwardPID=req.forward;
@@ -163,7 +167,7 @@ bool controller_srv_handler(srmauv_msgs::set_controller::Request &req){
 	inForwardVelPID=req.forward_vel;
 	inSidemoveVelPID=req.sidemove_vel;
 	inNavigation=req.navigation;
-
+	
 	res.complete=true;
 	return true;
 }
@@ -172,7 +176,23 @@ bool controller_srv_handler(srmauv_msgs::set_controller::Request &req){
 
 
 int main (String args[]){
-	ros::init("controller");
+	ros::init(argc,argv,"controller");
+	double forward_output,pitch_output,roll_ouput,heading_output,sidemove_output,depth_output;
+	double forward_vel_output,sidemove_vel_output;
+
+	ros::NodeHandle nh;
+	
+	thrusterPub=nh.advertise<srmauv_msgs::thruster>("/thruster_speed",1000);
+	depthPub=nh.advertise<srmauv_msgs::depth>("/depth",1000);
+	controllerPub=nh.advertise<srmauv_msgs::controller("/controller_targets",100);
+	locomotionModePub=nh.advertise<std_msgs::Int8>("/locomotion_mode",100,true);
+	pid_infoPub=nh.advertise<srmauv_msgs::pid_info>("/pid_info",1000);
+
+	//subscribers: 
+
+	velocitySub=nh.subscribe("
+	
+	
 	
 
 }

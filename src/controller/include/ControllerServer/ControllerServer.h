@@ -12,6 +12,7 @@ public:
 	ControllerServer(std::string name);
 	void updateState(float forward,float sidemove,float forward_vel,float sidemove_vel,float heading,float depth);
 	void executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal);
+	void ControllerActionServer::setDispMode(bool isVelSide,bool isVelFwd)
 	float getForward();
 	float getSidemove();
 	float getDepth();
