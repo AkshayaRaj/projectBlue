@@ -86,6 +86,7 @@ bool inPID;
 double depth_setpoint,depth_input,depth_output;
 double heading_setpoint,heading_input,heading_output;
 
+float depth_kp=1,depth_ki=0,depth_kd=0;
 PID depthPID(&depth_input,&depth_output,&depth_setpoint,1,0,0,DIRECT);
 
 void setup(){
@@ -290,3 +291,16 @@ void setLED(){
 	else
 		digitalWrite(RED,LOW);
 }
+
+void updateControllerInput(const nix_msgs::controller_input &msg){
+	depth_input=msg.depth_input;
+	depth_setpoint=msg.depth_setpoint;
+	
+}
+void updateControllerConstants(const nix_msgs::controller_constants &msg){
+	depthPID.SetTunings(msg.depth_kp,msg.depth_ki,msg.depth_kd);
+}
+
+
+
+
