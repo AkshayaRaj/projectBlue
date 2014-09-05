@@ -9,8 +9,8 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
 
-#define RED 1
-#define BLUE 2
+#define RED 0
+#define BLUE 36
 
 #define T1_PWM 2
 #define T2_PWM 3
@@ -286,10 +286,11 @@ void setLED(){
 		digitalWrite(BLUE,HIGH);
 	else
 		digitalWrite(BLUE,LOW);
-	if(inPID)
+	/*if(inPID)
 		digitalWrite(RED,HIGH);
 	else
 		digitalWrite(RED,LOW);
+*/
 }
 
 void updateControllerInput(const nix_msgs::controller_input &msg){
