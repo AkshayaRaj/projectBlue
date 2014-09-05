@@ -5,6 +5,14 @@ project(nix_msgs)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+roscpp
+rospy
+std_msgs
+message_generation
+actionlib_msgs
+geometry_msgs
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -40,11 +48,13 @@ find_package(catkin REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
+ add_message_files(
+   FILES
 #   Message1.msg
 #   Message2.msg
-# )
+	controller_constants.msg
+	controller_input.msg
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -80,7 +90,15 @@ catkin_package(
 #  LIBRARIES nix_msgs
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
+ CATKIN_DEPENDS message_generation message_runtime roscpp rospy std_msgs actionlib actionlib_msgs geometry_msgs
+
 )
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
+
 
 ###########
 ## Build ##
