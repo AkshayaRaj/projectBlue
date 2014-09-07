@@ -3,7 +3,7 @@
 #include <PID_v1.h>
 //#include <SoftwareSerial.h>
 #include <ArduinoHardware.h>
-#include <myKeyboard/Key.h>
+#include <keyboard/Key.h>
 #include <nix_msgs/controller_input.h>
 #include <nix_msgs/controller_constants.h>
 #include <std_msgs/Bool.h>
@@ -46,9 +46,9 @@ std_msgs::Bool inTeleopMode;
 //prototypes
 void updateControllerInput(const nix_msgs::controller_input &msg);
 void updateControllerConstants(const nix_msgs::controller_constants &msg);
-void collectTeleop(const myKeyboard::Key &msg);
+void collectTeleop(const keyboard::Key &msg);
 void setLED();
-void keyUp(const myKeyboard::Key &msg);
+void keyUp(const keyboard::Key &msg);
 void superImposePID();
 void runThrusters();
 void getDepthPIDUpdate();
@@ -63,8 +63,8 @@ void pid_heave(int speed);
 
 ros::Subscriber<nix_msgs::controller_input>pid_input_sub("controller_input",updateControllerInput);
 ros::Subscriber<nix_msgs::controller_constants>pid_constants("controller_constants",updateControllerConstants);
-ros::Subscriber<myKeyboard::Key>keydown_sub("/keyboard/keydown",collectTeleop);
-ros::Subscriber<myKeyboard::Key>keyup_sub("/keyboard/keyup",keyUp);
+ros::Subscriber<keyboard::Key>keydown_sub("/keyboard/keydown",collectTeleop);
+ros::Subscriber<keyboard::Key>keyup_sub("/keyboard/keyup",keyUp);
 
 
 ros::Publisher inTeleop_pub("inTeleop",&inTeleopMode);
@@ -157,7 +157,7 @@ void runThrusters(){
 
 }
 
-void collectTeleop(const myKeyboard::Key &msg){
+void collectTeleop(const keyboard::Key &msg){
 	if(msg.code==msg.KEY_t){
 		inTeleop=!inTeleop;
 		inPID=!inPID;
@@ -200,7 +200,7 @@ void getDepthPIDUpdate(){
 }
 	
 
-void keyUp(const myKeyboard::Key &msg){
+void keyUp(const keyboard::Key &msg){
 	if(inTeleop){
 		if(msg.code==msg.KEY_UP)
 			forward(0);
