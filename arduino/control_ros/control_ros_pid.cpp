@@ -152,7 +152,7 @@ void loop(){
 
 void runThrusters(){
 	
-	
+	pid_heave(depth_output);
 
 
 }
