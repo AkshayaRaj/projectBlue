@@ -49,13 +49,14 @@
   <run_depend>srmauv_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
   <build_depend>actionlib_msgs</build_depend>
-  <build_depend></build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+
   <build_depend></build_depend>
   <build_depend></build_depend>
   <build_depend></build_depend>
   <build_depend></build_depend>
   <run_depend>actionlib_msgs</run_depend>
-  <run_depend></run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
   <run_depend></run_depend>
   <run_depend></run_depend>
   <run_depend></run_depend>
