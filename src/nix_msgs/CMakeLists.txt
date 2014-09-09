@@ -53,6 +53,7 @@ geometry_msgs
 #   Message2.msg
 	controller_constants.msg
 	controller_input.msg
+	thruster_ratio.msg
  )
 
 ## Generate services in the 'srv' folder

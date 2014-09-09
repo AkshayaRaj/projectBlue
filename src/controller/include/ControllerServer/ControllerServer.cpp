@@ -115,7 +115,7 @@ ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
 		if(isFwdPos)
 			feedback_.forward_error=fabs(goal_.forward_setpoint-_forward_input) ;
 		else if(isFwdVel)
-			feedback_.forward_error=fabs(goal_.forward_vel_setpoint-_forwatd_vel_input);
+			feedback_.forward_error=fabs(goal_.forward_vel_setpoint-_forward_vel_input);
 		feedback_.sidemove_error=fabs(goal_.sidemove_setpoint-_sidemove_input);
 		feedback_.depth_error=fabs(goal_.depth_setpoint-_depth_input);
 		

@@ -1,0 +1,6 @@
+float32 thruster1_ratio
+float32 thruster2_ratio
+float32 thruster3_ratio
+float32 thruster4_ratio
+float32 thruster5_ratio
+float32 thruster6_ratio

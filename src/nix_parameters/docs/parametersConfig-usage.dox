@@ -1,0 +1,21 @@
+\subsubsection usage Usage
+\verbatim
+<node name="nix_parameters" pkg="nix_parameters" type="nix_parameters">
+  <param name="inDepthPID" type="bool" value="False" />
+  <param name="inTeleop" type="bool" value="True" />
+  <param name="motorOn" type="bool" value="False" />
+  <param name="thruster1_ratio" type="double" value="1.0" />
+  <param name="thruster2_ratio" type="double" value="1.0" />
+  <param name="thruster3_ratio" type="double" value="1.0" />
+  <param name="thruster4_ratio" type="double" value="1.0" />
+  <param name="thruster5_ratio" type="double" value="1.0" />
+  <param name="thruster6_ratio" type="double" value="1.0" />
+  <param name="depth_kp" type="double" value="1.0" />
+  <param name="depth_ki" type="double" value="0.0" />
+  <param name="depth_kd" type="double" value="0.0" />
+  <param name="depth_offset" type="double" value="0.0" />
+  <param name="depth_setpoint" type="double" value="0.0" />
+  <param name="depth_setpoint_distance" type="double" value="0.0" />
+</node>
+\endverbatim
+

@@ -1,0 +1,20 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~inDepthPID" : \b [bool] 0-Disable depth PID ,1: Enable depth PID min: False, default: False, max: True
+- \b "~inTeleop" : \b [bool] Set teleop mode min: False, default: True, max: True
+- \b "~motorOn" : \b [bool] Switch on the motor drivers min: False, default: False, max: True
+- \b "~thruster1_ratio" : \b [double] Thruster 1 Ratio min: 0.0, default: 1.0, max: 2.0
+- \b "~thruster2_ratio" : \b [double] Thruster 2 Ratio min: 0.0, default: 1.0, max: 2.0
+- \b "~thruster3_ratio" : \b [double] Thruster 3 Ratio min: 0.0, default: 1.0, max: 2.0
+- \b "~thruster4_ratio" : \b [double] Thruster 4 Ratio min: 0.0, default: 1.0, max: 2.0
+- \b "~thruster5_ratio" : \b [double] Thruster 5 Ratio min: 0.0, default: 1.0, max: 2.0
+- \b "~thruster6_ratio" : \b [double] Thruster 6 Ratio min: 0.0, default: 1.0, max: 2.0
+- \b "~depth_kp" : \b [double] Kp for depth PID min: 0.5, default: 1.0, max: 255.0
+- \b "~depth_ki" : \b [double] Ki for depth PID min: 0.5, default: 0.0, max: 255.0
+- \b "~depth_kd" : \b [double] Kd for depth PID min: 0.5, default: 0.0, max: 255.0
+- \b "~depth_offset" : \b [double] Check depth offset at water surface min: -1.0, default: 0.0, max: 1500.0
+- \b "~depth_setpoint" : \b [double] Setpoint for depth controller min: 0.0, default: 0.0, max: 700.0
+- \b "~depth_setpoint_distance" : \b [double] Setpoint in distance for depth controller min: 0.0, default: 0.0, max: 10.0
+

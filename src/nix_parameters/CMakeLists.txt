@@ -12,9 +12,13 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 
+generate_dynamic_reconfigure_options(
+        cfg/nix.cfg
+)
+
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -81,12 +85,12 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
+#catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nix_parameters
 #  CATKIN_DEPENDS dynamic_reconfigure nix_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
-)
+#)
 
 ###########
 ## Build ##
@@ -163,3 +167,11 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+
+
+add_executable(configure_server nodes/configure_server.cpp)
+target_link_libraries(configure_server ${catkin_LIBRARIES})
+#add_dependencies(configure_server ${PROJECT_NAME}_gencfg)
+#add_dependencies(example_node ${PROJECT_NAME}_gencfg)
+
