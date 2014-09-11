@@ -1,0 +1,5 @@
+To make udev rules -> first query .. eg:
+udevadm info -a -n /dev/ttyACM0
+
+To restart udev:
+sudo /etc/init.d/udev restart

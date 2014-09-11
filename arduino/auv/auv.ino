@@ -6,6 +6,7 @@
 #include <keyboard/Key.h>
 #include <nix_msgs/controller_input.h>
 #include <nix_msgs/controller_constants.h>
+#include <nix_msgs/controller_output.h>
 #include <nix_msgs/thruster_ratio.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
@@ -47,6 +48,7 @@ std_msgs::Int32 depth;
 nix_msgs::thruster_ratio ratio;
 nix_msgs::controller_input feedback;
 
+nix_msgs::controller_output controller_output;
 
 int timer=0;
 
@@ -84,7 +86,7 @@ ros::Subscriber<nix_msgs::thruster_ratio>thruster_ratio_sub("thruster_ratio",col
 ros::Publisher inTeleop_pub("inTeleop",&inTeleopMode);
 ros::Publisher depth_pub("depth",&depth);
 ros::Publisher feedback_pub("feedback",&feedback);
-
+ros::Publisher controller_output_pub("controller_output",&controller_output);
 
 
 
@@ -144,7 +146,7 @@ void setup(){
         nh.subscribe(motor_on_sub);
 	nh.advertise(inTeleop_pub);
         nh.advertise(depth_pub);
-
+        nh.advertise(controller_output_pub);
 	//PID initialization
 	depthPID.SetMode(AUTOMATIC);
 	depthPID.SetSampleTime(20);
@@ -245,6 +247,7 @@ void getDepthPIDUpdate(){
         sprintf(buf,"Depth-> SP:%d IN:%d OUT:%d",(int)depth_setpoint,(int)depth_input,(int)depth_output);
         nh.logwarn(buf);
         timer=0;
+        controller_output.depth_output=depth_output;
         }
 	}
 	else{

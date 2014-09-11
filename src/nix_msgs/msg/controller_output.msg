@@ -1,0 +1,3 @@
+float32 depth_output
+float32 heading_output
+float32 pitch_output
