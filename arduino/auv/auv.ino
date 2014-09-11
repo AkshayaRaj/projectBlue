@@ -162,7 +162,7 @@ void setup(){
 void loop(){
 	currentTime=millis();
         depth_input=analogRead(PRESSURE_SENSOR);
-        depth_input=130;
+        //depth_input=130;
         depth.data=depth_input;
 	if(inPID){
 	if(currentTime>=loopTime+40){
@@ -358,7 +358,7 @@ void setLED(){
 }
 
 void updateControllerInput(const nix_msgs::controller_input &msg){
-	depth_input=msg.depth_input;
+	//depth_input=msg.depth_input;
 	depth_setpoint=msg.depth_setpoint;
         nh.loginfo("updated depth setpoint");
         nh.spinOnce();
