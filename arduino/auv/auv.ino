@@ -83,6 +83,7 @@ ros::Subscriber<nix_msgs::thruster_ratio>thruster_ratio_sub("thruster_ratio",col
 
 ros::Publisher inTeleop_pub("inTeleop",&inTeleopMode);
 ros::Publisher depth_pub("depth",&depth);
+ros::Publisher feedback_pub("feedback",&feedback);
 
 
 
@@ -148,7 +149,7 @@ void setup(){
 	depthPID.SetMode(AUTOMATIC);
 	depthPID.SetSampleTime(20);
 	depthPID.SetOutputLimits(-255,255); //this can be changed as needed
-	depthPID.SetControllerDirection(REVERSE);
+	//depthPID.SetControllerDirection(REVERSE);
 
 	//Initialize timings
 	elapsedTime=0;
@@ -161,6 +162,7 @@ void setup(){
 void loop(){
 	currentTime=millis();
         depth_input=analogRead(PRESSURE_SENSOR);
+        depth_input=130;
         depth.data=depth_input;
 	if(inPID){
 	if(currentTime>=loopTime+40){
@@ -240,7 +242,7 @@ void getDepthPIDUpdate(){
         timer++;
         if(timer>1000){
         char buf[40];
-        sprintf(buf,"Depth-> SP:%f IN:%f OUT:%f",(float)12.4,(float)depth_input,(float)depth_output);
+        sprintf(buf,"Depth-> SP:%d IN:%d OUT:%d",(int)depth_setpoint,(int)depth_input,(int)depth_output);
         nh.logwarn(buf);
         timer=0;
         }
@@ -248,6 +250,10 @@ void getDepthPIDUpdate(){
 	else{
 	depth_output=0;
 	}
+
+       // feedback.depth_input=(float)depth;
+       // feedback.depth_output=(float)depth_output;
+       // feedback.depth_setpoint=(float)depth_setpoint;
 }
 	
 
