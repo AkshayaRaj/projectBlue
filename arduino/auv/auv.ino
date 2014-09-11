@@ -6,6 +6,7 @@
 #include <keyboard/Key.h>
 #include <nix_msgs/controller_input.h>
 #include <nix_msgs/controller_constants.h>
+#include <nix_msgs/thruster_ratio.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Int32.h>
@@ -43,6 +44,8 @@ ros::NodeHandle nh;
 //messages to publish:
 std_msgs::Bool inTeleopMode;
 std_msgs::Int32 depth;
+nix_msgs::thruster_ratio ratio;
+nix_msgs::controller_input feedback;
 
 
 int timer=0;
@@ -57,6 +60,7 @@ void superImposePID();
 void runThrusters();
 void getDepthPIDUpdate();
 void motorOn(const std_msgs::Bool &msg);
+void collectThruster(const nix_msgs::thruster_ratio &msg);
 
 void forward(int speed);
 void reverse(int speed);
@@ -72,6 +76,8 @@ ros::Subscriber<nix_msgs::controller_constants>pid_constants("controller_constan
 ros::Subscriber<keyboard::Key>keydown_sub("/keyboard/keydown",collectTeleop);
 ros::Subscriber<keyboard::Key>keyup_sub("/keyboard/keyup",keyUp);
 ros::Subscriber<std_msgs::Bool>motor_on_sub("motor_on",motorOn);
+ros::Subscriber<nix_msgs::thruster_ratio>thruster_ratio_sub("thruster_ratio",collectThruster);
+
 
 
 
@@ -175,6 +181,10 @@ void runThrusters(){
   
 }
 
+void collectThruster(const nix_msgs::thruster_ratio &msg){
+   ratio=msg; 
+}
+
 void collectTeleop(const keyboard::Key &msg){
 	if(msg.code==msg.KEY_t){
 		inTeleop=!inTeleop;
@@ -230,7 +240,7 @@ void getDepthPIDUpdate(){
         timer++;
         if(timer>1000){
         char buf[40];
-        sprintf(buf,"Depth-> SP:%2.6f IN:%2.6f OUT:%2.6f",(float)depth_setpoint,(float)depth_input,(float)depth_output);
+        sprintf(buf,"Depth-> SP:%f IN:%f OUT:%f",(float)12.4,(float)depth_input,(float)depth_output);
         nh.logwarn(buf);
         timer=0;
         }
@@ -267,8 +277,8 @@ void forward(int speed){
 	digitalWrite(T1_R,HIGH);
 	digitalWrite(T2_F,LOW);
 	digitalWrite(T2_R,HIGH);
-	analogWrite(T1_PWM,speed);
-	analogWrite(T2_PWM,speed);
+	analogWrite(T1_PWM,(int)speed*ratio.thruster1_ratio);
+	analogWrite(T2_PWM,(int)speed*ratio.thruster2_ratio);
 }
 
 void reverse(int speed){
@@ -276,8 +286,8 @@ void reverse(int speed){
         digitalWrite(T1_R,LOW);
         digitalWrite(T2_F,HIGH);
         digitalWrite(T2_R,LOW);
-        analogWrite(T1_PWM,speed);
-        analogWrite(T2_PWM,speed);
+        analogWrite(T1_PWM,(int)speed*ratio.thruster1_ratio);
+        analogWrite(T2_PWM,(int)speed*ratio.thruster2_ratio);
 
 }
 
@@ -286,8 +296,8 @@ void yaw_left(int speed){
 	digitalWrite(T3_R,LOW);
 	digitalWrite(T4_F,HIGH);
 	digitalWrite(T4_R,LOW);
-	analogWrite(T3_PWM,speed);
-	analogWrite(T4_PWM,speed);
+	analogWrite(T3_PWM,(int)speed*ratio.thruster3_ratio);
+	analogWrite(T4_PWM,(int)speed*ratio.thruster4_ratio);
 
 }
 void yaw_right(int speed){
@@ -295,8 +305,8 @@ void yaw_right(int speed){
 	digitalWrite(T3_R,HIGH);
 	digitalWrite(T4_F,LOW);
 	digitalWrite(T4_R,HIGH);
-	analogWrite(T3_PWM,speed);
-	analogWrite(T4_PWM,speed);
+	analogWrite(T3_PWM,(int)speed*ratio.thruster3_ratio);
+	analogWrite(T4_PWM,(int)speed*ratio.thruster4_ratio);
 }
 
 void heave(int speed){
@@ -304,8 +314,8 @@ void heave(int speed){
 	digitalWrite(T5_R,HIGH);
 	digitalWrite(T6_F,LOW);
 	digitalWrite(T6_R,HIGH);
-	analogWrite(T5_PWM,speed);
-	analogWrite(T6_PWM,speed);
+	analogWrite(T5_PWM,(int)speed*ratio.thruster5_ratio);
+	analogWrite(T6_PWM,(int)speed*ratio.thruster6_ratio);
 }
 
 void pid_heave(int speed){
@@ -314,16 +324,17 @@ void pid_heave(int speed){
 		digitalWrite(T5_R,LOW);
 		digitalWrite(T6_F,HIGH);
 		digitalWrite(T6_R,LOW);
-		analogWrite(T5_PWM,depth_output);
-		analogWrite(T6_PWM,depth_output);
+		analogWrite(T5_PWM,(int)speed*ratio.thruster5_ratio);
+		analogWrite(T6_PWM,(int)speed*ratio.thruster6_ratio);
 		}
 	else if(speed<0){
+                speed=speed*(-1);
                 digitalWrite(T5_F,LOW);
                 digitalWrite(T5_R,HIGH);
                 digitalWrite(T6_F,LOW);
                 digitalWrite(T6_R,HIGH);
-                analogWrite(T5_PWM,depth_output);
-                analogWrite(T6_PWM,depth_output);
+                analogWrite(T5_PWM,(int)speed*ratio.thruster5_ratio);
+                analogWrite(T6_PWM,(int)speed*ratio.thruster6_ratio);
                 }
 
 }
