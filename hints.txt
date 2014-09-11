@@ -1,3 +1,5 @@
+Full info on creating syslinks using udev rules: www.joakimlinde.se/microcontrollers/arduino/avr/udev.phpv
+
 To make udev rules -> first query .. eg:
 udevadm info -a -n /dev/ttyACM0
 
