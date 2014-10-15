@@ -55,6 +55,8 @@ geometry_msgs
 	controller_input.msg
 	thruster_ratio.msg
 	controller_output.msg
+	explorer_dvl_data.msg
+	dvl_vel.msg
  )
 
 ## Generate services in the 'srv' folder
@@ -75,6 +77,8 @@ geometry_msgs
  generate_messages(
    DEPENDENCIES
    std_msgs  # Or other packages containing msgs
+actionlib_msgs
+  geometry_msgs
 
  )
 
