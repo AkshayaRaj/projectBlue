@@ -47,7 +47,7 @@ std_msgs::Bool inTeleopMode;
 std_msgs::Int32 depth;
 nix_msgs::thruster_ratio ratio;
 nix_msgs::controller_input feedback;
-
+std_msgs::Bool demo;
 nix_msgs::controller_output controller_output;
 
 int timer=0;
@@ -79,7 +79,7 @@ ros::Subscriber<keyboard::Key>keydown_sub("/keyboard/keydown",collectTeleop);
 ros::Subscriber<keyboard::Key>keyup_sub("/keyboard/keyup",keyUp);
 ros::Subscriber<std_msgs::Bool>motor_on_sub("motor_on",motorOn);
 ros::Subscriber<nix_msgs::thruster_ratio>thruster_ratio_sub("thruster_ratio",collectThruster);
-
+ros::Subscriber<std_msgs::Bool>demo_sub("demo_mode",demo_modeCb);
 
 
 
@@ -139,6 +139,7 @@ void setup(){
 
 	//ROS Initialization
 	nh.initNode();
+	nh.subscribe(demo_sub);
 	nh.subscribe(pid_input_sub);
 	nh.subscribe(pid_constants);
 	nh.subscribe(keydown_sub);
@@ -171,12 +172,41 @@ void loop(){
 	
 			getDepthPIDUpdate();
 			runThrusters();
+			loopTime=currentTime();
 		}
 	}
         depth_pub.publish(&depth);
         //inTeleop_pub.publish(&inTeleopMode);
 
 	nh.spinOnce();
+}
+void demo_modeCb(std_msgs::Bool &msg){
+	if(msg){
+	heave(230);
+	delay(5000);
+	forward(230);
+	delay(4000);
+	forward(0);
+	reverse(230);
+	delay(2000);
+	reverse(0);
+	yaw_left(230);
+	delay(4000);
+	yaw_left(0);
+	yaw_right(230);
+	delay(4000);
+	yaw_right(0);
+	heave(0);
+	delay(5000);
+	heave(255);
+	delay(4000);
+	forward(255);
+	delay(4000);	
+	forward(0);
+	heave(0);
+	delay(2000);
+	}
+	
 }
 
 void runThrusters(){
