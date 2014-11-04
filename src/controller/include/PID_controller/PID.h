@@ -19,7 +19,7 @@ public:
 	void setActuatorSatModel(int min,int max);
 	double actuatorConstrain(double val);
 	double computePID(double setpoint,double input);
-	double wrapAngleTo360(double error,double heading);  //check inputs
+	double wrapAngle360(double error,double heading);  //check inputs
 	void clearIntegrator();
 	virtual ~sednaPID();
 
@@ -38,7 +38,7 @@ private:
 	double _total;
 	ros::Time oldTime;
 	double inputOld;
-	std:string _name;
+	std::string _name;
 };
 	
 

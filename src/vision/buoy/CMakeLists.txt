@@ -1,28 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(controller)
+project(buoy)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  actionlib
-  roscpp
-  srmauv_msgs
-  std_msgs
-  rospy
-  actionlib
-  actionlib_msgs
-  sensor_msgs
-  nav_msgs
-  dynamic_reconfigure
-  
-)
-
-generate_dynamic_reconfigure_options(
-	cfg/SednaController.cfg
-)
-
-link_libraries(m)
+find_package(catkin REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -81,7 +63,7 @@ link_libraries(m)
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   srmauv_msgs#   std_msgs
+#   std_msgs  # Or other packages containing msgs
 # )
 
 ###################################
@@ -95,8 +77,8 @@ link_libraries(m)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES controller
-#  CATKIN_DEPENDS actionlib roscpp srmauv_msgs std_msgs
+#  LIBRARIES buoy
+#  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
 
@@ -106,32 +88,22 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
- include_directories(include)
- include_directories(include/ControllerServer)
- include_directories(include/NavUtils)
- include_directories(include/PID_controller)
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  
-)
+# include_directories(include)
 
 ## Declare a cpp library
-# add_library(controller
-#   src/${PROJECT_NAME}/controller.cpp
+# add_library(buoy
+#   src/${PROJECT_NAME}/buoy.cpp
 # )
 
 ## Declare a cpp executable
- add_executable(controller src/SednaController.cpp include/PID_controller/PID.cpp include/ControllerServer/ControllerServer.cpp)
-add_dependencies(controller srmauv_msgs_generate_messages_cpp)
-
-
+# add_executable(buoy_node src/buoy_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(controller_node controller_generate_messages_cpp)
+# add_dependencies(buoy_node buoy_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(controller_node
+# target_link_libraries(buoy_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -150,7 +122,7 @@ add_dependencies(controller srmauv_msgs_generate_messages_cpp)
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS controller controller_node
+# install(TARGETS buoy buoy_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -175,7 +147,7 @@ add_dependencies(controller srmauv_msgs_generate_messages_cpp)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_controller.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_buoy.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

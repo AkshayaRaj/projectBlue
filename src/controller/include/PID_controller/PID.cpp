@@ -1,6 +1,6 @@
 #include "PID.h"
 #include <ros/ros.h>
-#include <Math.h>
+#include <math.h>
 #include <std_msgs/Float32.h>
 
 #define ACTMIN -1000
@@ -35,7 +35,7 @@ namespace srmauv{
 		return _total;
 	}
 
-	void sednaPID::setActutorSatModel(int min=ACTMIN,int max=ACTMAX) {
+	void sednaPID::setActuatorSatModel(int min=ACTMIN,int max=ACTMAX) {
 		actMax=max;
 		actMin=min;
 	}
@@ -43,7 +43,7 @@ namespace srmauv{
 	sednaPID::sednaPID(std::string name,double P,double I,double D,int Ncut) {
 		_name=name;
 		N=Ncut;
-		Kp=p;
+		Kp=P;
 		Ti=I;
 		Td=D;
 		
@@ -67,17 +67,17 @@ namespace srmauv{
 		return actuatorConstrain;
 	}
 
-	double sednaPID::computePID{
+	double sednaPID::computePID(double setpoint,double input){
 	 	ros::Time nowTime=ros::Time::now();
 		double output;
-		double dt=nowTime.nsec()-oldTime.nsec();
+		double dt=nowTime.nsec-oldTime.nsec;
 		double Tt=sqrt(Ti*Td);
 
-		oldTime>nowTime ? dt=(nowTime.nsec()+1000000000-oldTime.nsec())/1000000 : 
-					dt=nowTime.nsec()/1000000;
+		oldTime>nowTime ? dt=(nowTime.nsec+1000000000-oldTime.nsec)/1000000 : 
+					dt=nowTime.nsec/1000000;
 		_proportional=Kp*(setpoint-input);
 		//the following is setpoint weighting and bandwidth limitation for derivative:
-		_derivative=(Td/(Td+(N*dt))*(_derivative-(Kp*N*(input-inputOld)));
+		_derivative=(Td/(Td+N*dt))*(_derivative-Kp*N*(input-inputOld));
 			
 		_total=_proportional+_derivative+_integral;
 

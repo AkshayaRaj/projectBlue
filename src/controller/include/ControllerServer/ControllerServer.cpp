@@ -4,7 +4,7 @@
 */
 
 #include <ros/ros.h>
-#include "ContollerServer.h"
+#include "ControllerServer.h"
 #include <actionlib/server/simple_action_server.h>
 #include <srmauv_msgs/ControllerAction.h>
 #include <math.h>
@@ -21,7 +21,7 @@
 
 //construtor 
 ControllerServer::ControllerServer(std::string name):
-as_(nh_,name,boost::bind(&ControllerActionServer::executeCb,this,_1),false),
+as_(nh_,name,boost::bind(&ControllerServer::executeCb,this,_1),false),
 action_name_(name) 
 {
 	
@@ -40,7 +40,7 @@ action_name_(name)
 }
 
 //execute callback:
-ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
+void ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
 
 	bool isForwardDone=false;
 	bool isDepthDone=false;
@@ -52,17 +52,19 @@ ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
 	ros::Rate r(10);	
 
 	//now modifying the local goal variable according to the goal setpoint message:
-	//forward and sidemove setpoints are relative 
+	//forward and sidemove setpoints are relative
+	goal_.depth_setpoint=goal->depth_setpoint;
+	goal_.heading_setpoint=goal->heading_setpoint; 
 	goal_.forward_setpoint=goal->forward_setpoint+_forward_input;
-	goal_.sidemode_setpoint=goal->sidemove_setpoint+_sidemove_input;
+	goal_.sidemove_setpoint=goal->sidemove_setpoint+_sidemove_input;
 	goal_.forward_vel_setpoint=goal->forward_vel_setpoint;
 	goal_.sidemove_vel_setpoint=goal->sidemove_vel_setpoint;
 
 
 	
-	ROS_INFO("Controller Action Server has just received a goal -> F: %3.2f ,F_goal: %3.2f ,S: %3.2f ,S_goal: %3.2f ,D_goal: %3.2f, H_goal: %3.2f ",goal_.forward_setpoint,goal->forward_setpoint,goal_.sidemove_setpoint,goal->sidemove_setpoint,goal->sidemove_setpoint,goal_.depth_setpoint,goal_.heading_setpoint);
+	ROS_INFO("Controller Action Server has just received a goal -> F: %3.2f ,F_goal: %3.2f ,S: %3.2f ,S_goal: %3.2f ,D_goal: %3.2f, H_goal: %3.2f ",goal_.forward_setpoint,goal->forward_setpoint,goal_.sidemove_setpoint,goal_.sidemove_setpoint,goal->sidemove_setpoint,goal_.depth_setpoint,goal_.heading_setpoint);
 
-	ROS_INFO("Velocity goals are-> vf_g: %3.2f ,vs_g: %3.2f",goal_->forward_vel_setpoint,goal_->sidemove_vel_setpoint); 
+	ROS_INFO("Velocity goals are-> vf_g: %3.2f ,vs_g: %3.2f",goal_.forward_vel_setpoint,goal_.sidemove_vel_setpoint); 
 
 	while( ros::ok() && success && !(isForwardDone && isDepthDone && isSidemoveDone && isHeadingDone) ){ //we can  disable isSidemoveDone when needed from here on a top level
 				
@@ -141,7 +143,7 @@ ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
 
 		
 
-	void ContollerServer::updateInfo(float forward,float sidemove,float forward_vel,float sidemove_vel,float heading,float depth) // this function will obtain inputs from the PID controller
+	void ControllerServer::updateInfo(float forward,float sidemove,float forward_vel,float sidemove_vel,float heading,float depth) // this function will obtain inputs from the PID controller
 	{
 		_forward_input=forward;
 		_sidemove_input=sidemove;
@@ -156,6 +158,7 @@ ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
 		double error=setpoint-heading;
 		if(error>180)
 			heading+=360;
+
 		else if (error<-180)
 			heading-=360;
 		return fabs(heading);
@@ -187,7 +190,7 @@ ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal){
 		return goal_.forward_vel_setpoint;
 	}
 
-void ControllerActionServer::setDispMode(bool isVelSide,bool isVelFwd)
+void ControllerServer::setDispMode(bool isVelSide,bool isVelFwd)
 {
   if(isVelSide)
   {

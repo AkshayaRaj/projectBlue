@@ -1,23 +1,21 @@
 #include "PID.h"
 #include <ros/ros.h>
-#include <srmauvmsgs/thruster.h>
+#include <srmauv_msgs/thruster.h>
+#include <srmauv_msgs/controller.h>
 #include <srmauv_msgs/depth.h>
 #include <srmauv_msgs/compass_data.h>
 #include <srmauv_msgs/ControllerAction.h> //action
 #include <srmauv_msgs/imu_data.h>
 #include <srmauv_msgs/set_controller.h> //service
 #include <srmauv_msgs/pid_info.h>
-#include <srmauv_msgs/locomation_mode.h>
-#include <std_msgs/Odometry.h>
 #include <dynamic_reconfigure/server.h>
-// take care of generation of PID controller configuration of the dynamic server 
-//inlcude the genereation file here
+#include <controller/controllerConfig.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Int16.h>
-#include <Std_msgs/Int8.h>
-#include <PID_Controller/PID.h>
-# include <Navutils/Navutils.h>
-#include <std_msgs/Imu.h>
+#include <std_msgs/Int8.h>
+#include <PID_controller/PID.h>
+#include <NavUtils/NavUtils.h>
+#include <sensor_msgs/Imu.h>
 #include <nav_msgs/Odometry.h>
 #include <actionlib/server/simple_action_server.h>
 #include <ControllerServer/ControllerServer.h>
@@ -43,21 +41,21 @@ srmauv_msgs::depth depthValue;
 srmauv_msgs::thruster thrusterSpeed;
 srmauv_msgs::compass_data orientationAngles;
 srmauv_msgs::pid_info pidInfo;
-nava_msgs::Odometry odomData;
+nav_msgs::Odometry odomData;
 std_msgs::Int8 current__mode;
 
 double depth_offset = 0;
 
 
 
-void getDVL(const nav_msgs::Odometry::ConstPtr& msg);
 void getOrientation(const srmauv_msgs::compass_data::ConstPtr& msg);
 void getPressure(const srmauv_msgs::depth::ConstPtr& msg);
 void getTeleop(const srmauv_msgs::thruster::ConstPtr& msg);
-void callback(Sedna_controller::SednaControllerConfig &config,uint32 level);
+void callback(controller::controllerConfig &config,uint32 level);
 double getHeadingPIDUpdate(); // some angle wrapping required 
 float computeVelSideOffset();
 float computeVelFwdOffset();
+float interpolateDepth(float);
 void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemovePID_output);
 void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output;
 double fmap (int input, int in_min, int in_max, int out_min, int out_max);
@@ -89,6 +87,7 @@ ros::Subscriber velocitySub;
 srmauv::sednaPID depthPID("d",1.2,0,0,20);
 srmauv::sednaPID headingPID("h",1.2,0,0,20);
 srmauv::sednaPID pitchPID("p",1.2,0,0,20);
+
 srmauv::sednaPID rollPID("r",1.2,0,0,20);
 srmauv::sednaPID forwardPID("f",1.2,0,0,20);
 srmauv::sednaPID sidemovePID("s",1.2,0,0,20);
@@ -106,8 +105,7 @@ int loc_mode_heading[4] = {-400,400,-400,400};
 
 int  manual_speed[6]={0,0,0,0,0,0};
 
-]
-]
+
 
 //sets the correct actuator models 
 bool locomotion_srv_handler(srmauv_msgs::locomotion_mode::Request &req, 
@@ -145,8 +143,9 @@ bool locomotion_srv_handler(srmauv_msgs::locomotion_mode::Request &req,
 		forwardPID.setActuatorSatModel(act_forward[0],act_forward[1]);
 		sidemovePID.setActuatorSatModel(act_sidemove[0],act_sidemove[1]);
 		ROS_INFO("We are in Default movement mode");
-		res.success=true;		
-	}
+		res.success=true;
+	}		
+	
 	else{
 		res.success=false;
 	}
@@ -190,12 +189,101 @@ int main (String args[]){
 
 	//subscribers: 
 
-	velocitySub=nh.subscribe("
+	//DVL here:	velocitySub=nh.subscribe("
+	orientationSub=nh.subscribe("/euler",1000,collectionOrientation);
+	pressureSub=nh.subscribe("/pressure_data",1000,collectPressure);
+	teleopSub=nh.subscribe("/teleop_controller",1000,collectTeleop);
+	//Dynamic reconfigure:
+	dynamic_reconfigure::Server <controller::controllerConfig>server;
+	dynamic_reconfigure::Server<controller::controllerConfig>::CallbackType f;
+	f=boost::bind(&callback,_1,_2);
+	server.setCallback(f);
+
+	//initialize services
 	
+	ros::ServiceServer locomotion_service=nh.advertiseService("locomotion_mode_srv",locomotion_srv_handler);
+	ROS_INFO("Change modes using locomotion_mode_srv");
 	
+	ros::ServiceServer service=nh.advertiseService("set_controller_srv",controller_srv_handler);
+	ROS_INFO("Enable disable PID's using set_controller_srv");
+
+	//Initialize the ActionServer:
+
+	ControllerServer as("LocomotionServer");
+	//PID Loop will run at 20Hz
+	ros::Rate loop_rate(loop_frequency);
 	
+	//publish the initial standard mode locomotion mode message
+	std_msgs::Int8 std_mode;
+	std_mode.data=0;
+	locomotionModePub.publish(std_mode);	
+	ROS_INFO("PID controllers are ready .. !");
+	
+	while(ros::ok())
+	{
+		if(inHovermode && oldHoverMode!=inHoverMode)
+		{
+			
+			
+		
+
+		}
+	}
 
 }
+
+
+
+
+
+float interpolateDepth(float adcVal){
+	//do depth interpolation here
+	return adcval;
+}
+	
+
+
+
+
+
+
+void collectPressure(const std_msgs::Int16 &msg){
+	
+	double depth=(double)interpolateDepth(msg.data);
+	
+	depthValue.pressure=msg->data;
+	depthValue.depth=depth;
+	ctrl.depth_input=depth;
+}
+
+void collectOrientation(const srmauv_msgs::compass_data &msg){
+
+	ctrl.heading_input=msg->yaw;
+	ctrl.pitch_input=msg->pitch;
+	ctrl.roll_input=msg->roll;
+}
+
+
+
+double fmap(int input, int in_min, int in_max, int out_min, int out_max){
+  return (input- in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

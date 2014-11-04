@@ -12,12 +12,12 @@
 
 class NavUtils{
 public:
-	Navutils();
+	NavUtils();
 	double quaternionToPitch(double q0,double q1,double q2,double q3);
 	double quaternionToYaw(double q0,double q1,double q2,double q3);
 	double quaternionToRoll(double q0,double q1,double q2,double q3);
 	
-	virtual ~Navutils();
+	virtual ~NavUtils();
 };
 
 

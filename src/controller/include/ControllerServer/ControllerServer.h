@@ -10,15 +10,17 @@
 class ControllerServer{
 public:
 	ControllerServer(std::string name);
-	void updateState(float forward,float sidemove,float forward_vel,float sidemove_vel,float heading,float depth);
+	void updateInfo(float forward,float sidemove,float forward_vel,float sidemove_vel,float heading,float depth);
 	void executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal);
-	void ControllerActionServer::setDispMode(bool isVelSide,bool isVelFwd)
+	void setDispMode(bool isVelSide,bool isVelFwd);
 	float getForward();
 	float getSidemove();
 	float getDepth();
 	float getHeading();
+	float getSidemoveVel();
+	float getForwardVel();
 	void setNavigation(bool nav);
-	virtual ~ControllerActionServer();
+	virtual ~ControllerServer();
 
 private:
 	double wrapAngle360(double error ,double heading);
@@ -37,9 +39,10 @@ private:
 	float MIN_SIDEMOVE;
 	float MIN_DEPTH;
 	float MIN_HEADING;
-	float MIN_SEDEMOVE_VEL;
+	float MIN_SIDEMOVE_VEL;
 	float MIN_FORWARD_VEL;
-
+	
+	bool _inNavigation;
 	bool isFwdPos;
 	bool isFwdVel;
 	bool isSidePos;
@@ -47,8 +50,8 @@ private:
 	
 	
 protected:
-	ros::NodeHandle nh;
-	actionlib::SimpleActionServer<srmauv_msgs::ControlerAction> as_;
+	ros::NodeHandle nh_;
+	actionlib::SimpleActionServer<srmauv_msgs::ControllerAction> as_;
 	std::string action_name_;
 	int data_count_;
 	float sum_,sum_sq_;

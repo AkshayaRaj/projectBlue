@@ -63,6 +63,8 @@ void runThrusters();
 void getDepthPIDUpdate();
 void motorOn(const std_msgs::Bool &msg);
 void collectThruster(const nix_msgs::thruster_ratio &msg);
+void demoShow();
+void demo_modeCb(const std_msgs::Bool &msg);
 
 void forward(int speed);
 void reverse(int speed);
@@ -136,7 +138,9 @@ void setup(){
 	yaw_right_speed=230;
 	heave_speed=255;
         depth_setpoint=162;
-
+      
+      
+       demoShow();
 	//ROS Initialization
 	nh.initNode();
 	nh.subscribe(demo_sub);
@@ -158,7 +162,10 @@ void setup(){
 	elapsedTime=0;
 	currentTime=millis();
 	loopTime=currentTime;
-	
+        
+        
+       
+
 
 }
 
@@ -172,7 +179,7 @@ void loop(){
 	
 			getDepthPIDUpdate();
 			runThrusters();
-			loopTime=currentTime();
+			loopTime=currentTime;
 		}
 	}
         depth_pub.publish(&depth);
@@ -180,8 +187,8 @@ void loop(){
 
 	nh.spinOnce();
 }
-void demo_modeCb(std_msgs::Bool &msg){
-	if(msg){
+void demo_modeCb(const std_msgs::Bool &msg){
+	if(msg.data){
 	heave(230);
 	delay(5000);
 	forward(230);
@@ -207,6 +214,78 @@ void demo_modeCb(std_msgs::Bool &msg){
 	delay(2000);
 	}
 	
+}
+
+void demoShow(){
+        heave(255);
+	delay(5000);
+	forward(230);
+	delay(4000);
+	forward(0);
+	reverse(230);
+	delay(2000);
+	reverse(0);
+	yaw_left(230);
+	delay(4000);
+	yaw_left(0);
+	yaw_right(230);
+	delay(4000);
+	yaw_right(0);
+	heave(0);
+	delay(5000);
+	heave(255);
+	delay(4000);
+	forward(255);
+	delay(4000);	
+	forward(0);
+	heave(0);
+	delay(2000);
+heave(255);
+	delay(5000);
+	forward(230);
+	delay(4000);
+	forward(0);
+	reverse(230);
+	delay(2000);
+	reverse(0);
+	yaw_left(230);
+	delay(4000);
+	yaw_left(0);
+	yaw_right(230);
+	delay(4000);
+	yaw_right(0);
+	heave(0);
+	delay(5000);
+	heave(255);
+	delay(4000);
+	forward(255);
+	delay(4000);	
+	forward(0);
+	heave(0);
+	delay(2000);
+heave(255);
+	delay(5000);
+	forward(230);
+	delay(4000);
+	forward(0);
+	reverse(230);
+	delay(2000);
+	reverse(0);
+	yaw_left(230);
+	delay(4000);
+	yaw_left(0);
+	yaw_right(230);
+	delay(4000);
+	yaw_right(0);
+	heave(0);
+	delay(5000);
+	heave(255);
+	delay(4000);
+	forward(255);
+	delay(4000);	
+	forward(0);
+	heave(0);
+	delay(2000);
 }
 
 void runThrusters(){
