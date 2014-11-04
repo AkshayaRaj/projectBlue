@@ -1,7 +1,6 @@
 #include "PID.h"
 #include <ros/ros.h>
 #include <srmauv_msgs/thruster.h>
-#include <srmauv_msgs/controller.h>
 #include <srmauv_msgs/depth.h>
 #include <srmauv_msgs/compass_data.h>
 #include <srmauv_msgs/ControllerAction.h> //action
@@ -22,9 +21,10 @@
 #include <geometry_msgs/Twist.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
-
+#include <srmauv_msgs/controller.h>
+#include <srmauv_msgs/locomotion_mode.h>
 //this will be calibrated from the sensor
-const static int loop_freq=20;
+const static int loop_frequency=20;
 const static int PSI30 = 206842;
 const static int PSI100 = 689475;
 const static int ATM = 99974;
@@ -49,19 +49,19 @@ double depth_offset = 0;
 
 
 void getOrientation(const srmauv_msgs::compass_data::ConstPtr& msg);
-void getPressure(const srmauv_msgs::depth::ConstPtr& msg);
+void getPressure(const std_msgs::Int16& msg);
 void getTeleop(const srmauv_msgs::thruster::ConstPtr& msg);
-void callback(controller::controllerConfig &config,uint32 level);
+void callback(controller::controllerConfig &config,uint32_t level);
 double getHeadingPIDUpdate(); // some angle wrapping required 
 float computeVelSideOffset();
 float computeVelFwdOffset();
 float interpolateDepth(float);
 void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemovePID_output);
-void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output;
+void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output);
 double fmap (int input, int in_min, int in_max, int out_min, int out_max);
 
 //State Machines : 
-bool inTop,inTeleop,inHover=false,oldHover=false;
+bool inTop,inTeleop,inHovermode=false,oldHovermode=false;
 bool inDepthPID,inHeadingPID,inForwardPID,inSidemovePID,inPitchPID,inRollPID,
 	inForwardVelPID,inSidemoveVelPID;
 bool inNavigation;
@@ -109,7 +109,7 @@ int  manual_speed[6]={0,0,0,0,0,0};
 
 //sets the correct actuator models 
 bool locomotion_srv_handler(srmauv_msgs::locomotion_mode::Request &req, 
-				srmauv_locomotion_mode::Response &res)
+				srmauv_msgs::locomotion_mode::Response &res)
 {
 	int mode=0;
 	if(req.forward && req.sidemove){
@@ -149,6 +149,7 @@ bool locomotion_srv_handler(srmauv_msgs::locomotion_mode::Request &req,
 	else{
 		res.success=false;
 	}
+	std_msgs::Int8 current_mode;
 	current_mode.data=mode;
 	locomotionModePub.publish(current_mode); //publish the mode we are in
 	return true;
@@ -156,7 +157,8 @@ bool locomotion_srv_handler(srmauv_msgs::locomotion_mode::Request &req,
 }
 
 //the controller service call can enable/disable the various PID controllers
-bool controller_srv_handler(srmauv_msgs::set_controller::Request &req){
+bool controller_srv_handler(srmauv_msgs::set_controller::Request &req,
+				srmauv_msgs::set_controller::Response &res){
 	inDepthPID=req.depth;
 	inForwardPID=req.forward;
 	inSidemovePID=req.sidemove;
@@ -174,7 +176,7 @@ bool controller_srv_handler(srmauv_msgs::set_controller::Request &req){
 
 
 
-int main (String args[]){
+int main (int argc,char **argv){
 	ros::init(argc,argv,"controller");
 	double forward_output,pitch_output,roll_ouput,heading_output,sidemove_output,depth_output;
 	double forward_vel_output,sidemove_vel_output;
@@ -183,16 +185,16 @@ int main (String args[]){
 	
 	thrusterPub=nh.advertise<srmauv_msgs::thruster>("/thruster_speed",1000);
 	depthPub=nh.advertise<srmauv_msgs::depth>("/depth",1000);
-	controllerPub=nh.advertise<srmauv_msgs::controller("/controller_targets",100);
+	controllerPub=nh.advertise<srmauv_msgs::controller>("/controller_targets",100);
 	locomotionModePub=nh.advertise<std_msgs::Int8>("/locomotion_mode",100,true);
 	pid_infoPub=nh.advertise<srmauv_msgs::pid_info>("/pid_info",1000);
 
 	//subscribers: 
 
 	//DVL here:	velocitySub=nh.subscribe("
-	orientationSub=nh.subscribe("/euler",1000,collectionOrientation);
-	pressureSub=nh.subscribe("/pressure_data",1000,collectPressure);
-	teleopSub=nh.subscribe("/teleop_controller",1000,collectTeleop);
+	orientationSub=nh.subscribe("/euler",1000,getOrientation);
+	pressureSub=nh.subscribe("/pressure_data",1000,getPressure);
+	teleopSub=nh.subscribe("/teleop_controller",1000,getTeleop);
 	//Dynamic reconfigure:
 	dynamic_reconfigure::Server <controller::controllerConfig>server;
 	dynamic_reconfigure::Server<controller::controllerConfig>::CallbackType f;
@@ -221,7 +223,7 @@ int main (String args[]){
 	
 	while(ros::ok())
 	{
-		if(inHovermode && oldHoverMode!=inHoverMode)
+		if(inHovermode && oldHovermode!=inHovermode)
 		{
 			
 			
@@ -238,7 +240,7 @@ int main (String args[]){
 
 float interpolateDepth(float adcVal){
 	//do depth interpolation here
-	return adcval;
+	return adcVal;
 }
 	
 
@@ -247,16 +249,17 @@ float interpolateDepth(float adcVal){
 
 
 
-void collectPressure(const std_msgs::Int16 &msg){
+void getPressure(const std_msgs::Int16 &msg){
 	
 	double depth=(double)interpolateDepth(msg.data);
 	
-	depthValue.pressure=msg->data;
+	depthValue.pressure=msg.data;
 	depthValue.depth=depth;
 	ctrl.depth_input=depth;
 }
 
-void collectOrientation(const srmauv_msgs::compass_data &msg){
+void getOrientation(const srmauv_msgs::compass_data::ConstPtr& msg){
+
 
 	ctrl.heading_input=msg->yaw;
 	ctrl.pitch_input=msg->pitch;
@@ -274,12 +277,15 @@ double fmap(int input, int in_min, int in_max, int out_min, int out_max){
 
 
 
+void callback(controller::controllerConfig &config, uint32_t level) {
+
+}
 
 
 
+void getTeleop(const srmauv_msgs::thruster::ConstPtr &msg){
 
-
-
+}
 
 
 
