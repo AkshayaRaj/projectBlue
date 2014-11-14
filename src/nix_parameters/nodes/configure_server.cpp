@@ -66,7 +66,7 @@ velocity_pub.publish(dvl_vel);
 
 
 
-int main(int argc,char **argv){
+int main(int argc, char** argv, int advertise) {
 	ros::init(argc,argv,"configure_server");
 	ros::NodeHandle nh;
 	ros::Timer timer = nh.createTimer(ros::Duration(0.2), timerCallback);

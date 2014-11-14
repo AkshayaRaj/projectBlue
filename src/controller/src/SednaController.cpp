@@ -30,11 +30,11 @@ const static int PSI100 = 689475;
 const static int ATM = 99974;
 
 double  thruster1_level = 1,
-	thruster2_level = 1,
-	thruster3_level= 1,
-	thruster4_level = 1,
-	thruster5_level =1,
-	thruster6_level =1;
+		thruster2_level = 1,
+		thruster3_level= 1,
+		thruster4_level = 1,
+		thruster5_level =1,
+		thruster6_level =1;
 
 srmauv_msgs::controller ctrl ;
 srmauv_msgs::depth depthValue;
@@ -219,22 +219,53 @@ int main (int argc,char **argv){
 	std_msgs::Int8 std_mode;
 	std_mode.data=0;
 	locomotionModePub.publish(std_mode);	
-	ROS_INFO("PID controllers are ready .. !");
+	ROS_INFO("PID controllers are ready lets roll.. !");
 	
 	while(ros::ok())
 	{
-		if(inHovermode && oldHovermode!=inHovermode)
+		if(inHovermode && oldHovermode!=inHovermode) // so we hover over a point
 		{
+			ctrl.forward_setpoint=ctrl.forward_input;
+			ctrl.sidemove_setpoint=ctrl.sidemove_input;
+			//ctrl.depth_setpoint=ctrl.depth_input;
+			//ctrl.pitch_setpoint=ctrl.depth_input;
+			//ctrl.heading_setpoint=ctrl.heading_input;
 			
-			
+			oldHovermode=inHovermode;			
 		
 
 		}
-	}
+		if(inDepthPID)
+		{
+			depth_output=depthPID.computePID((double)ctrl.depth_setpoint,ctrl.depth_input);
+			pidInfo.depth.p=depthPID.getProportional();
+			pidInfo.depth.i=depthPID.getIntegral();
+			pidInfo.depth.d=depthPID.getIntegral();
+			pidInfo.depth.total=depth_output;	
+			
+			
+		}
+		else{
+			depth_output=0;
+			depthPID.clearIntegrator();
+		}
+		if(inHeadingPID)
+		{
+				heading_output=getHeadingPIDUpdate();
+				pidInfo.heading.p=headingPID.getProportional();
+				pidInfo.heading.i=headingPID.getIntegral();
+				pidInfo.heading.d=headingPID.getIntegral();
+				pidInfo.heading.total=headingPID.getTotal();
+
+		}
+		else{
+			heading_output=0;
+			headingPID.clearIntegrator();
+		}
 
 }
 
-
+}
 
 
 
@@ -243,6 +274,13 @@ float interpolateDepth(float adcVal){
 	return adcVal;
 }
 	
+double getHeadingPIDUpdate(){
+	//this piece may be a couse of some major issues related to the heading controller.. make changes as needed : Akshaya
+	double wrappedHeading;
+	double error=(double)ctrl.heading_setpoint-(double)ctrl.heading_input;
+	wrappedHeading=headingPID.wrapAngle360(error,ctrl.heading_input);
+	return headingPID.computePID(ctrl.heading_setpoint,wrappedHeading);
+}
 
 
 
@@ -251,7 +289,9 @@ float interpolateDepth(float adcVal){
 
 void getPressure(const std_msgs::Int16 &msg){
 	
-	double depth=(double)interpolateDepth(msg.data);
+	// the message that is coming is the raw ADC value from the pressure sensor.. lets try to add some filtering to it somewere else probably
+
+	double depth=(double)interpolateDepth((float)msg.data);
 	
 	depthValue.pressure=msg.data;
 	depthValue.depth=depth;
@@ -286,40 +326,6 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 void getTeleop(const srmauv_msgs::thruster::ConstPtr &msg){
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
-
-
-
-
-
-
-
-
-
-
 
 
 

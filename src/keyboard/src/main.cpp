@@ -3,7 +3,7 @@
 #include "keyboard.h"
 using namespace std;
 
-int main(int argc, char** argv)
+int main(int argc, char** argv, int advertise)
 {  
   ros::init(argc, argv, "keyboard");
   ros::NodeHandle n("~");
