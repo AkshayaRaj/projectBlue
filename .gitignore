@@ -1,0 +1,17 @@
+/devel
+/build
+/install
+*.pyc
+.pydevproject
+.project
+*.bag
+*.bag.org.active
+*.bag.active
+/src/CMakeLists.txt
+
+*.bak
+*.swp
+*.png
+*.jpg
+*.vim
+
