@@ -62,7 +62,15 @@ void ControllerServer::executeCb(const srmauv_msgs::ControllerGoalConstPtr &goal
 
 
 	
-	ROS_INFO("Controller Action Server has just received a goal -> F: %3.2f ,F_goal: %3.2f ,S: %3.2f ,S_goal: %3.2f ,D_goal: %3.2f, H_goal: %3.2f ",goal_.forward_setpoint,goal->forward_setpoint,goal_.sidemove_setpoint,goal_.sidemove_setpoint,goal->sidemove_setpoint,goal_.depth_setpoint,goal_.heading_setpoint);
+	ROS_INFO("Controller Action Server has just received a goal :  \n"
+	    "F: %3.2f\tF_goal: %3.2f\n"
+	    "S: %3.2f\tS_goal: %3.2f\n"
+	    "D_goal: %3.2f\n"
+	    "H_goal: %3.2f \n",
+	    goal_.forward_setpoint,goal->forward_setpoint,
+	    goal_.sidemove_setpoint,goal->sidemove_setpoint,
+	    goal_.depth_setpoint,
+	    goal_.heading_setpoint);
 
 	ROS_INFO("Velocity goals are-> vf_g: %3.2f ,vs_g: %3.2f",goal_.forward_vel_setpoint,goal_.sidemove_vel_setpoint); 
 

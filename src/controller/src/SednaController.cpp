@@ -23,19 +23,21 @@
 #include <math.h>
 #include <srmauv_msgs/controller.h>
 #include <srmauv_msgs/locomotion_mode.h>
+#include <srmauv_msgs/thruster.h>
 //this will be calibrated from the sensor
 const static int loop_frequency=20;
 const static int PSI30 = 206842;
 const static int PSI100 = 689475;
 const static int ATM = 99974;
 
-double  thruster1_level = 1,
-		thruster2_level = 1,
-		thruster3_level= 1,
-		thruster4_level = 1,
-		thruster5_level =1,
-		thruster6_level =1;
+double          thruster1_ratio = 1,
+		thruster2_ratio = 1,
+		thruster3_ratio= 1,
+		thruster4_ratio = 1,
+		thruster5_ratio =1,
+		thruster6_ratio =1;
 
+srmauv_msgs::thruster thruster;
 srmauv_msgs::controller ctrl ;
 srmauv_msgs::depth depthValue;
 srmauv_msgs::thruster thrusterSpeed;
@@ -263,8 +265,12 @@ int main (int argc,char **argv){
 			headingPID.clearIntegrator();
 		}
 
-}
+		controllerPub.publish(ctrl);
 
+		ros::spinOnce();
+		loop_rate.sleep();
+}
+	return 0;
 }
 
 
@@ -304,6 +310,8 @@ void getOrientation(const srmauv_msgs::compass_data::ConstPtr& msg){
 	ctrl.heading_input=msg->yaw;
 	ctrl.pitch_input=msg->pitch;
 	ctrl.roll_input=msg->roll;
+
+
 }
 
 
@@ -318,6 +326,55 @@ double fmap(int input, int in_min, int in_max, int out_min, int out_max){
 
 
 void callback(controller::controllerConfig &config, uint32_t level) {
+	ROS_INFO("Reconfigure Request");
+	thruster1_ratio=config.thruster1_ratio;
+	thruster2_ratio=config.thruster2_ratio;
+	thruster3_ratio=config.thruster3_ratio;
+	thruster4_ratio=config.thruster4_ratio;
+	thruster5_ratio=config.thruster5_ratio;
+	thruster6_ratio=config.thruster6_ratio;
+
+
+
+	inDepthPID=config.depth_PID;
+	inHeadingPID=config.heading_PID;
+	inPitchPID=config.pitch_PID;
+	inRollPID=config.roll_PID;
+
+	inTeleop=config.teleop;
+	inHovermode=config.hovermode;
+
+	ctrl.depth_setpoint=config.depth_setpoint;
+	ctrl.heading_setpoint=config.heading_setpoint;
+	ctrl.roll_setpoint=config.roll_setpoint;
+	ctrl.pitch_setpoint=config.pitch_setpoint;
+
+	depthPID.setKp(config.depth_Kp);
+	depthPID.setTd(config.depth_Td);
+	depthPID.setTi(config.depth_Ti);
+
+	headingPID.setKp(config.heading_Kp);
+	headingPID.setTd(config.heading_Td);
+	headingPID.setTi(config.heading_Ti);
+
+        rollPID.setKp(config.roll_Kp);
+        rollPID.setTd(config.roll_Td);
+        rollPID.setTi(config.roll_Ti);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 

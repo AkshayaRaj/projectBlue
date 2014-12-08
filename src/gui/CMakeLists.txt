@@ -1,28 +1,35 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(controller)
+cmake_minimum_required(VERSION 2.8.9)
+project(gui)
+
+## In the event that rosrun GUI GUI_node doesn't work and you're looking at this,
+## Just create two empty folders under src/GUI called include and GUI_node
+## Then run catkin_make or catm if you installed our aliases. And it'll work
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  actionlib
   roscpp
-  srmauv_msgs
-  std_msgs
   rospy
+  std_msgs
+  image_transport
+  cv_bridge
   actionlib
   actionlib_msgs
-  sensor_msgs
-  nav_msgs
+  srmauv_msgs
   dynamic_reconfigure
-  
 )
 
-generate_dynamic_reconfigure_options(
-	cfg/SednaController.cfg
-)
+##Required for QT5
+#set (Qt5Widgets_DIR "/home/ndt/Softwares/Qt/5.1.1/gcc_64/lib/cmake/Qt5Widgets") ## for Thien's case only
+if(APPLE)
+    #alex homebrew
+    set(CMAKE_PREFIX_PATH "/usr/local/opt/qt5")
+endif()
+find_package(Qt5Widgets)
 
-link_libraries(m)
+##Required for OpenCV
+find_package(OpenCV)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -73,15 +80,16 @@ link_libraries(m)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
+#   DIRECTORY
+#   action
 #   FILES
-#   Action1.action
-#   Action2.action
+#   Controller.action
 # )
 
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   srmauv_msgs#   std_msgs
+#   std_msgs
 # )
 
 ###################################
@@ -94,11 +102,11 @@ link_libraries(m)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES controller
-#  CATKIN_DEPENDS actionlib roscpp srmauv_msgs std_msgs
-#  DEPENDS system_lib
-)
+  INCLUDE_DIRS include
+  LIBRARIES gui
+  CATKIN_DEPENDS roscpp rospy std_msgs actionlib message_runtime srmauv_msgs
+  DEPENDS system_lib
+ )
 
 ###########
 ## Build ##
@@ -106,43 +114,43 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
- include_directories(include)
- include_directories(include/ControllerServer)
- include_directories(include/NavUtils)
- include_directories(include/PID_controller)
+# include_directories(include)
 include_directories(
+  include 
   ${catkin_INCLUDE_DIRS}
-  
+  ${Qt5Widgets_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
+
+link_directories(
+	libs
+)
+
+##Required for QT5
+add_definitions(${Qt5Widgets_DEFINITIONS})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+
 
 ## Declare a cpp library
-# add_library(controller
-#   src/${PROJECT_NAME}/controller.cpp
-# )
+#add_library(GUI
+#  src/auv_gui.cpp
+#)
 
 ## Declare a cpp executable
- add_executable(controller src/SednaController.cpp include/PID_controller/PID.cpp include/ControllerServer/ControllerServer.cpp)
-add_dependencies(controller srmauv_msgs_generate_messages_cpp)
-
-add_executable(pid_client src/actionClient.cpp)
-target_link_libraries(pid_client 
-  ${catkin_LIBRARIES}
-)
-add_dependencies(pid_client $(controller_EXPORTED_TARGETS))
-
-
-target_link_libraries(controller 
-  ${catkin_LIBRARIES}
-)
+add_executable(tuner src/tuning_ui.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(controller_node controller_generate_messages_cpp)
-
+add_dependencies(tuner srmauv_msgs_generate_messages_cpp)
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(controller_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(tuner
+  ${catkin_LIBRARIES}
+  Qt5::Widgets
+  qcustomplot
+)
+##Required for QT5
+qt5_use_modules( tuner Widgets PrintSupport)
 
 #############
 ## Install ##
@@ -159,7 +167,7 @@ target_link_libraries(controller
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS controller controller_node
+# install(TARGETS GUI GUI_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -184,7 +192,7 @@ target_link_libraries(controller
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_controller.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_GUI.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
