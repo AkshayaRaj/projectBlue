@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-project(gui)
+project(ui)
 
 ## In the event that rosrun GUI GUI_node doesn't work and you're looking at this,
 ## Just create two empty folders under src/GUI called include and GUI_node
@@ -103,7 +103,7 @@ find_package(OpenCV)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES gui
+  LIBRARIES ui
   CATKIN_DEPENDS roscpp rospy std_msgs actionlib message_runtime srmauv_msgs
   DEPENDS system_lib
  )
