@@ -35,7 +35,9 @@ double          thruster1_ratio = 1,
 		thruster3_ratio= 1,
 		thruster4_ratio = 1,
 		thruster5_ratio =1,
-		thruster6_ratio =1;
+		thruster6_ratio =1,
+		thruster7_ratio=1,
+		thruster8_ratio=1;
 
 srmauv_msgs::thruster thruster;
 srmauv_msgs::controller ctrl ;
@@ -333,6 +335,8 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 	thruster4_ratio=config.thruster4_ratio;
 	thruster5_ratio=config.thruster5_ratio;
 	thruster6_ratio=config.thruster6_ratio;
+	thruster7_ratio=config.thruster7_ratio;
+	thruster8_ratio=config.thruster8_ratio;
 
 
 
