@@ -51,7 +51,7 @@ std_msgs::Int8 current__mode;
 double depth_offset = 0;
 
 
-
+void getVisionSidemove(const std_msgs::Int16& msg);
 void getOrientation(const srmauv_msgs::compass_data::ConstPtr& msg);
 void getPressure(const std_msgs::Int16& msg);
 void getTeleop(const srmauv_msgs::thruster::ConstPtr& msg);
@@ -283,7 +283,7 @@ float interpolateDepth(float adcVal){
 }
 	
 double getHeadingPIDUpdate(){
-	//this piece may be a couse of some major issues related to the heading controller.. make changes as needed : Akshaya
+	//this piece may be a cause of some major issues related to the heading controller.. make changes as needed : Akshaya
 	double wrappedHeading;
 	double error=(double)ctrl.heading_setpoint-(double)ctrl.heading_input;
 	wrappedHeading=headingPID.wrapAngle360(error,ctrl.heading_input);
