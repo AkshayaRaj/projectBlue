@@ -1,3 +1,9 @@
+// #define REVERSE   change the yaw controller output direction
+
+#define LARGE_RANGE 2400
+#define SMALL_RANGE 400
+#define SAFETY_RANGE 2700
+
 #include "PID.h"
 #include <ros/ros.h>
 #include <srmauv_msgs/thruster.h>
@@ -103,9 +109,9 @@ int act_sidemove[2];
 int act_heading[2];
 
 //index 0,1 and 2,3 are forward and sidemove settings respectively
-int loc_mode_forward[4] = {-2400,2400,-400,400};
-int loc_mode_sidemove[4] = {-400,400,-2400,2400};
-int loc_mode_heading[4] = {-400,400,-400,400};
+int loc_mode_forward[4] = {-LARGE_RANGE,LARGE_RANGE,-SMALL_RANGE,SMALL_RANGE};
+int loc_mode_sidemove[4] = {-SMALL_RANGE,SMALL_RANGE,-LARGE_RANGE,LARGE_RANGE};
+int loc_mode_heading[4] = {-SMALL_RANGE,SMALL_RANGE,-SMALL_RANGE,SMALL_RANGE};
 
 int  manual_speed[6]={0,0,0,0,0,0};
 
@@ -323,7 +329,44 @@ double fmap(int input, int in_min, int in_max, int out_min, int out_max){
 }
 
 
+void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemovePID_output)
+{
+  //write code for forward movement
 
+#ifndef REVERSE
+  double speed7_output=-(double)headingPID_output-(sidemovePID_output);
+  double speed8_output=(double)headingPID_output-(sidemovePID_output);
+#endif
+
+#ifdef REVERSE
+  double speed7_output=(double)headingPID_output-(sidemovePID_output);
+  double speed8_output=-(double)headingPID_output-(sidemovePID_output);
+#endif
+
+  if(speed7_output>SAFETY_RANGE)
+    thrusterSpeed.speed7=SAFETY_RANGE;
+  else if(speed7_output<-SAFETY_RANGE)
+    thrusterSpeed.speed7=-SAFETY_RANGE;
+  else
+    thrusterSpeed.speed7=speed7_output;
+
+  if(speed8_output>SAFETY_RANGE)
+    thrusterSpeed.speed8=SAFETY_RANGE;
+  else if(speed8_output<-SAFETY_RANGE)
+    thrusterSpeed.speed8=-SAFETY_RANGE;
+  else
+    thrusterSpeed.speed8=speed8_output;
+
+
+
+}
+
+
+void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output)
+{
+
+
+}
 
 
 
