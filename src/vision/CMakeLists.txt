@@ -11,10 +11,12 @@ find_package(catkin REQUIRED COMPONENTS
   srmauv_msgs
   std_msgs
   actionlib_msgs
+  dynamic_reconfigure
 )
 
 generate_dynamic_reconfigure_options(
 	cfg/buoys.cfg
+	
 )
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
