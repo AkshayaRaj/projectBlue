@@ -45,7 +45,7 @@ class Buoys:
     # Keep track of the previous centroids for matching
     previousCentroid = None
     previousArea = None
-    
+    found=None    
     
     def rosimg2cv(self,ros_img):
         try:
@@ -70,7 +70,7 @@ class Buoys:
         self.register()
         self.previousCentroid=(-1,-1)
         self.previousArea=0
-    
+    	self.found=False
         
         
     
