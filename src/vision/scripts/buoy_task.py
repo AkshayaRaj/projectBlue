@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import roslib; roslib.load_manifest('vision')
+#import roslib; roslib.load_manifest('vision')
 
 import cv2
 import math
@@ -16,7 +16,7 @@ import vision.cfg.buoyConfig as Config
 from unittest import signals
 from OpenGL.raw.GL.SGIX import framezoom
 import signal
-
+import os
 
 
 
@@ -65,7 +65,7 @@ class Buoys:
         signal.signal(signal.SIGINT,self.userQuit)
         self.imgData={'detected':False}
         self.bridge=CvBridge()
-        self.camera_topic=rospy.get_param('~image', '/sedna/camera/front/image_raw')
+        self.camera_topic=rospy.get_param('~front_camera_topic', '/sedna/camera/front/image_raw')
         self.image_filter_pub=rospy.Publisher("/Vision/image_filter",Image)
         self.register()
         self.previousCentroid=(-1,-1)
@@ -89,7 +89,7 @@ class Buoys:
         
     def userQuit(self,signal,frame):
         rospy.loginfo("Buoy server is shutting down")
-        
+        raise SystemExit('Exiting')
     
 
 
@@ -151,6 +151,7 @@ class Buoys:
             rospy.logerr(e)
             rospy.loginfo("CvBridge error")
         self.circles(frame)
+	rospy.loginfo(self.lowThresh[0])
         
 if __name__=="__main__":
     rospy.init_node("buoy_detector")

@@ -5,7 +5,9 @@ keyboard::Keyboard::Keyboard(void)
   if (SDL_Init(SDL_INIT_VIDEO) < 0) throw std::runtime_error("Could not init SDL");
   SDL_EnableKeyRepeat(0, 0);
   SDL_WM_SetCaption("ROS keyboard input", NULL);
-  window = SDL_SetVideoMode(100, 100, 0, 0);
+  window = SDL_SetVideoMode(640, 480, 0, 0);
+
+
 }
 
 keyboard::Keyboard::~Keyboard(void)

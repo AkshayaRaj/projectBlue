@@ -1,0 +1,4 @@
+SUBSYSTEM=="tty" ATTRS{manufacturer}=="Arduino*" SYMLINK+="arduino%n"
+SUBSYSTEM=="video4linux" ATTRS{manufacturer}=="Microsoft" ATTRS{idProduct}=="075d" SYMLINK+="lifecam"
+#SUBSYSTEM=="video4linux" ATTRS{manufacturer}=="Microsoft" SYMLINK+="lifecam"
+
