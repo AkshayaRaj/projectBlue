@@ -13,6 +13,7 @@
 #include <srmauv_msgs/imu_data.h>
 #include <srmauv_msgs/set_controller.h> //service
 #include <srmauv_msgs/pid_info.h>
+#include <srmauv_msgs/teleop_sedna.h>
 #include <dynamic_reconfigure/server.h>
 #include <controller/controllerConfig.h>
 #include <std_msgs/Float32.h>
@@ -53,6 +54,7 @@ srmauv_msgs::compass_data orientationAngles;
 srmauv_msgs::pid_info pidInfo;
 nav_msgs::Odometry odomData;
 std_msgs::Int8 current__mode;
+srmauv_msgs::teleop_sedna teleop;
 
 double depth_offset = 0;
 
@@ -79,6 +81,7 @@ bool velocityMode;
 bool inVisionTracking;
 bool isForward=false;
 bool isSidemove=false;
+
 
 ros::Publisher thrusterPub;
 ros::Publisher controllerPub;
@@ -204,7 +207,7 @@ int main (int argc,char **argv){
 	//DVL here:	velocitySub=nh.subscribe("
 	orientationSub=nh.subscribe("/euler",1000,getOrientation);
 	pressureSub=nh.subscribe("/pressure_data",1000,getPressure);
-	teleopSub=nh.subscribe("/teleop_controller",1000,getTeleop);
+	teleopSub=nh.subscribe("/teleop_sedna",1000,getTeleop);
 	//Dynamic reconfigure:
 	dynamic_reconfigure::Server <controller::controllerConfig>server;
 	dynamic_reconfigure::Server<controller::controllerConfig>::CallbackType f;
@@ -427,8 +430,16 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 
 
 
-void getTeleop(const srmauv_msgs::thruster::ConstPtr &msg){
+void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
+  if(msg->enable){
+    inTeleop=true;
+      if(msg->enable_depth){
 
+      }
+  }
+  else{
+    inTeleop=false;
+  }
 }
 
 

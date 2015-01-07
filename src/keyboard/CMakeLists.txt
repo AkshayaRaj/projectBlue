@@ -164,15 +164,20 @@ CATKIN_DEPENDS roscpp std_msgs message_runtime
 include_directories(${catkin_INCLUDE_DIRS} ${SDL_INCLUDE_DIR})
 
 add_executable(keyboard src/main.cpp src/keyboard.cpp)
+add_executable(teleop src/teleop.cpp)
 target_link_libraries(keyboard
+  ${LIBS}
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(teleop
   ${LIBS}
   ${catkin_LIBRARIES}
 )
 
 add_dependencies(keyboard keyboard_gencpp)
+add_dependencies(teleop teleop_gencpp)
 
-
-install(TARGETS keyboard
+install(TARGETS keyboard teleop
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

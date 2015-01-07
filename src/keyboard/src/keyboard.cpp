@@ -1,5 +1,6 @@
 #include "keyboard.h"
 
+
 keyboard::Keyboard::Keyboard(void)
 {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) throw std::runtime_error("Could not init SDL");

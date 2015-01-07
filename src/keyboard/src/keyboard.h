@@ -6,6 +6,7 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
+
 namespace keyboard {
   class Keyboard {
     public:
@@ -18,6 +19,7 @@ namespace keyboard {
     private:
       SDL_Surface* window;
       TTF_Font* font;
+
 
   };    
 }

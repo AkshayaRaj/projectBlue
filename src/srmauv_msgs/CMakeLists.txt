@@ -59,6 +59,7 @@ geometry_msgs
 	pid_info.msg
 	thruster.msg
 	vision.msg
+	teleop_sedna.msg
 
  )
 
