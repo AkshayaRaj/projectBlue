@@ -62,7 +62,8 @@ double depth_offset = 0;
 void getVisionSidemove(const std_msgs::Int16& msg);
 void getOrientation(const srmauv_msgs::compass_data::ConstPtr& msg);
 void getPressure(const std_msgs::Int16& msg);
-void getTeleop(const srmauv_msgs::thruster::ConstPtr& msg);
+//void getTeleop(const srmauv_msgs::thruster::ConstPtr& msg);
+void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg);
 void callback(controller::controllerConfig &config,uint32_t level);
 double getHeadingPIDUpdate(); // some angle wrapping required 
 float computeVelSideOffset();
@@ -410,18 +411,6 @@ void callback(controller::controllerConfig &config, uint32_t level) {
         rollPID.setKp(config.roll_Kp);
         rollPID.setTd(config.roll_Td);
         rollPID.setTi(config.roll_Ti);
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

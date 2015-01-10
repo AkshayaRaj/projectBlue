@@ -11,7 +11,7 @@ int main(int argc,char** argv){
   ros::NodeHandle nh("~");
 
 
-  teleop_sub=nh.subscribe("")
+ // teleop_sub=nh.subscribe("")
 
 	return 0;
 }
