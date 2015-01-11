@@ -30,7 +30,7 @@ class Buoys:
     bridge=None
     lowThresh=np.array([0,0,0])
     highThresh=np.array([0,0,0])
-    screen={'width':640,'height':480}
+    screen={'width':320,'height':240}
     image=None
     circleParams = {'minRadius':13, 'maxRadius': 0 }
     houghParams = (74, 11)
@@ -66,7 +66,7 @@ class Buoys:
         self.imgData={'detected':False}
         self.bridge=CvBridge()
         self.camera_topic=rospy.get_param('~front_camera_topic', '/sedna/camera/front/image_raw')
-        self.image_filter_pub=rospy.Publisher("/Vision/image_filter",Image)
+        self.image_filter_pub=rospy.Publisher("~/vision/image_filter",Image)
         self.register()
         self.previousCentroid=(-1,-1)
         self.previousArea=0
