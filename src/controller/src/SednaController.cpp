@@ -6,6 +6,7 @@
 
 #include "PID.h"
 #include <ros/ros.h>
+#include <tf/tf.h>
 #include <srmauv_msgs/thruster.h>
 #include <srmauv_msgs/depth.h>
 #include <srmauv_msgs/compass_data.h>
@@ -19,6 +20,7 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Int8.h>
+#include <sensor_msgs/Imu.h>
 #include <PID_controller/PID.h>
 #include <NavUtils/NavUtils.h>
 #include <sensor_msgs/Imu.h>
@@ -60,7 +62,7 @@ double depth_offset = 0;
 
 
 void getVisionSidemove(const std_msgs::Int16& msg);
-void getOrientation(const srmauv_msgs::compass_data::ConstPtr& msg);
+void getOrientation(const sensor_msgs::Imu::ConstPtr& msg);
 void getPressure(const std_msgs::Int16& msg);
 //void getTeleop(const srmauv_msgs::thruster::ConstPtr& msg);
 void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg);
@@ -206,7 +208,7 @@ int main (int argc,char **argv){
 	//subscribers: 
 
 	//DVL here:	velocitySub=nh.subscribe("
-	orientationSub=nh.subscribe("/euler",1000,getOrientation);
+	orientationSub=nh.subscribe("/imu/data",1000,getOrientation);
 	pressureSub=nh.subscribe("/pressure_data",1000,getPressure);
 	teleopSub=nh.subscribe("/teleop_sedna",1000,getTeleop);
 	//Dynamic reconfigure:
@@ -307,7 +309,7 @@ double getHeadingPIDUpdate(){
 
 void getPressure(const std_msgs::Int16 &msg){
 	
-	// the message that is coming is the raw ADC value from the pressure sensor.. lets try to add some filtering to it somewere else probably
+	// the message that is coming is the raw ADC value from the pressure sensor.. lets try to add some filtering to it somewhere else probably
 
 	double depth=(double)interpolateDepth((float)msg.data);
 	
@@ -316,12 +318,16 @@ void getPressure(const std_msgs::Int16 &msg){
 	ctrl.depth_input=depth;
 }
 
-void getOrientation(const srmauv_msgs::compass_data::ConstPtr& msg){
-
-
-	ctrl.heading_input=msg->yaw;
-	ctrl.pitch_input=msg->pitch;
-	ctrl.roll_input=msg->roll;
+void getOrientation(const sensor_msgs::Imu::ConstPtr& msg){
+        tf::Quaternion q;
+        double roll,pitch,yaw;
+        tf::quaternionMsgToTF(msg->orientation,q);
+        tf::Matrix3x3(q).getRPY(roll,pitch,yaw);
+	ctrl.heading_input=yaw;
+	ctrl.pitch_input=pitch;
+	ctrl.roll_input=roll;
+	int x=5;
+	ROS_INFO("%f\t%f\t%f\t",yaw,pitch,roll);
 
 
 }
