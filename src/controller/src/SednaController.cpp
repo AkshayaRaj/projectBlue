@@ -1,8 +1,8 @@
 // #define REVERSE   change the yaw controller output direction
 
-#define LARGE_RANGE 2400
-#define SMALL_RANGE 400
-#define SAFETY_RANGE 2700
+#define LARGE_RANGE 300
+#define SMALL_RANGE 200
+#define SAFETY_RANGE 400
 
 #include "PID.h"
 #include <ros/ros.h>
@@ -60,6 +60,12 @@ srmauv_msgs::teleop_sedna teleop;
 
 double depth_offset = 0;
 
+struct teleop_speed{
+  double sidemove;
+  double forward;
+  double reverse;
+}teleop_velocity;
+
 
 void getVisionSidemove(const std_msgs::Int16& msg);
 void getOrientation(const sensor_msgs::Imu::ConstPtr& msg);
@@ -74,6 +80,9 @@ float interpolateDepth(float);
 void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemovePID_output);
 void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output);
 double fmap (int input, int in_min, int in_max, int out_min, int out_max);
+void mapHorizontalThrusters();
+void mapVerticalThrusters();
+
 
 //State Machines : 
 bool inTop,inTeleop,inHovermode=false,oldHovermode=false;
@@ -201,9 +210,9 @@ int main (int argc,char **argv){
 	
 	thrusterPub=nh.advertise<srmauv_msgs::thruster>("/thruster_speed",1000);
 	depthPub=nh.advertise<srmauv_msgs::depth>("/depth",1000);
-	controllerPub=nh.advertise<srmauv_msgs::controller>("/controller_targets",100);
+	controllerPub=nh.advertise<srmauv_msgs::controller>("/controller_targets",100);   // verified with tuining_ui
 	locomotionModePub=nh.advertise<std_msgs::Int8>("/locomotion_mode",100,true);
-	pid_infoPub=nh.advertise<srmauv_msgs::pid_info>("/pid_info",1000);
+	pid_infoPub=nh.advertise<srmauv_msgs::pid_info>("/pid_info",1000);   // verified with tuining_ui
 
 	//subscribers: 
 
@@ -219,10 +228,10 @@ int main (int argc,char **argv){
 
 	//initialize services
 	
-	ros::ServiceServer locomotion_service=nh.advertiseService("locomotion_mode_srv",locomotion_srv_handler);
+	ros::ServiceServer locomotion_service=nh.advertiseService("controller/locomotion_mode_srv",locomotion_srv_handler);
 	ROS_INFO("Change modes using locomotion_mode_srv");
 	
-	ros::ServiceServer service=nh.advertiseService("set_controller_srv",controller_srv_handler);
+	ros::ServiceServer service=nh.advertiseService("controller/set_controller_srv",controller_srv_handler);
 	ROS_INFO("Enable disable PID's using set_controller_srv");
 
 	//Initialize the ActionServer:
@@ -280,7 +289,9 @@ int main (int argc,char **argv){
 		}
 
 		controllerPub.publish(ctrl);
-
+		pid_infoPub.publish(pidInfo);
+		thrusterPub.publish(thrusterSpeed);
+		ROS_DEBUG(" F %i, SM%i, H %i, P %i, R %i, D %i, Nav %i",inForwardPID,inSidemovePID,inHeadingPID,inPitchPID, inRollPID, inDepthPID,inNavigation);
 		ros::spinOnce();
 		loop_rate.sleep();
 }
@@ -344,13 +355,13 @@ void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,
   //write code for forward movement
 
 #ifndef REVERSE
-  double speed7_output=-(double)headingPID_output-(sidemovePID_output);
-  double speed8_output=(double)headingPID_output-(sidemovePID_output);
+  double speed7_output=thruster7_ratio*(-(double)headingPID_output-(sidemovePID_output)-teleop_velocity.sidemove);
+  double speed8_output=thruster8_ratio*((double)headingPID_output-(sidemovePID_output)-teleop_velocity.sidemove);
 #endif
 
 #ifdef REVERSE
-  double speed7_output=(double)headingPID_output-(sidemovePID_output);
-  double speed8_output=-(double)headingPID_output-(sidemovePID_output);
+  double speed7_output=thruster7_ratio*((double)headingPID_output-(sidemovePID_output)-teleop_velocity.sidemove);
+  double speed8_output=thruster8_ratio*(-(double)headingPID_output-(sidemovePID_output)-teleop_velocity.sidemove);
 #endif
 
   if(speed7_output>SAFETY_RANGE)
@@ -374,10 +385,38 @@ void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,
 
 void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output)
 {
+  double speed3_output = thruster3_ratio*(- depthPID_output + pitchPID_output - rollPID_output);
+  double speed4_output = thruster4_ratio*(- depthPID_output + pitchPID_output + rollPID_output);
+  double speed5_output = thruster5_ratio*(- depthPID_output - pitchPID_output + rollPID_output);
+  double speed6_output = thruster6_ratio*(- depthPID_output - pitchPID_output - rollPID_output);
+
+  if(speed3_output < -SAFETY_RANGE) thrusterSpeed.speed3 = -SAFETY_RANGE;
+      else if(speed3_output >SAFETY_RANGE) thrusterSpeed.speed3 = SAFETY_RANGE;
+      else thrusterSpeed.speed3= speed3_output;
+
+      if(speed4_output < -SAFETY_RANGE) thrusterSpeed.speed4 = -SAFETY_RANGE;
+      else if(speed4_output >SAFETY_RANGE) thrusterSpeed.speed4 = SAFETY_RANGE;
+      else thrusterSpeed.speed4= speed4_output;
+
+      if(speed5_output < -SAFETY_RANGE) thrusterSpeed.speed5 = -SAFETY_RANGE;
+      else if(speed5_output >SAFETY_RANGE) thrusterSpeed.speed5 = SAFETY_RANGE;
+      else thrusterSpeed.speed5= speed5_output;
+
+      if(speed6_output < -SAFETY_RANGE) thrusterSpeed.speed6 = -SAFETY_RANGE;
+      else if(speed6_output >SAFETY_RANGE) thrusterSpeed.speed6 = SAFETY_RANGE;
+      else thrusterSpeed.speed6= speed6_output;
+
 
 
 }
 
+void mapHorizontalThrusters(){
+
+}
+
+void mapVerticalThrusters(){
+
+}
 
 
 void callback(controller::controllerConfig &config, uint32_t level) {

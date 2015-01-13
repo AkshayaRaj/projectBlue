@@ -197,7 +197,7 @@ void ControlUI::subscribeToData() {
 	errorSub = nh.subscribe("/LocomotionServer/feedback", 1, &ControlUI::errorCallBack, this);
 
 	//Graph controller points
-	graph_update = nh.subscribe("/controller_points", 1, &ControlUI::controllerPointsCallBack, this);
+	graph_update = nh.subscribe("/controller_targets", 1, &ControlUI::controllerPointsCallBack, this);
 
 	pidInfoSub = nh.subscribe("/pid_info", 1, &ControlUI::pidInfoCallback, this);
 }
@@ -244,7 +244,7 @@ void ControlUI::updatePIDChecks(bool depth, bool heading, bool forward, bool sid
 	updateParameter("pitch_PID", pitch, conf);
 
 	srv_req.config = conf;
-	ros::service::call("/Controller/set_parameters", srv_req, srv_resp);
+	ros::service::call("/controller/set_parameters", srv_req, srv_resp);
 	controlUI->ui.statusbar->showMessage("PID Checks sent!", 3000);
 }
 
@@ -252,11 +252,11 @@ void ControlUI::loadDynamicParams() {
 	for (int i = 0; i < numParams; i++) {
 		if (paramsTypes[i%5] == "double_t") {
 			double val;
-			ros::param::param<double>("/Controller/" + dynamicParams[i], val, 0.0);
+			ros::param::param<double>("/controller/" + dynamicParams[i], val, 0.0);
 			params[dynamicParams[i]] = boost::lexical_cast<string>(val);
 		} else if (paramsTypes[i%5] == "int_t") {
 			int val;
-			ros::param::param<int>("/Controller/" + dynamicParams[i], val, 0);
+			ros::param::param<int>("/controller/" + dynamicParams[i], val, 0);
 			params[dynamicParams[i]] = boost::lexical_cast<string>(val);
 		}
 	}
@@ -265,12 +265,12 @@ void ControlUI::loadDynamicParams() {
 void ControlUI::loadPIDChecks() {
 	bool forward, sidemove, heading, depth, pitch, roll;
 
-	ros::param::param<bool>("/Controller/forward_PID", forward, false);
-	ros::param::param<bool>("/Controller/sidemove_PID", sidemove, false);
-	ros::param::param<bool>("/Controller/heading_PID", heading, false);
-	ros::param::param<bool>("/Controller/depth_PID", depth, false);
-	ros::param::param<bool>("/Controller/pitch_PID", pitch, false);
-	ros::param::param<bool>("/Controller/roll_PID", roll, false);
+	ros::param::param<bool>("/controller/forward_PID", forward, false);
+	ros::param::param<bool>("/controller/sidemove_PID", sidemove, false);
+	ros::param::param<bool>("/controller/heading_PID", heading, false);
+	ros::param::param<bool>("/controller/depth_PID", depth, false);
+	ros::param::param<bool>("/controller/pitch_PID", pitch, false);
+	ros::param::param<bool>("/controller/roll_PID", roll, false);
 
 	ui.roll_check->setChecked(roll);
 	ui.pitch_check->setChecked(pitch);
@@ -517,12 +517,12 @@ void fire() {
 		dynamic_reconfigure::Config conf;
 
 		bool forward, sidemove, heading, depth, pitch, roll;
-		ros::param::get("/Controller/forward_PID", forward);
-		ros::param::get("/Controller/sidemove_PID", sidemove);
-		ros::param::get("/Controller/heading_PID", heading);
-		ros::param::get("/Controller/depth_PID", depth);
-		ros::param::get("/Controller/pitch_PID", pitch);
-		ros::param::get("/Controller/roll_PID", roll);
+		ros::param::get("/controller/forward_PID", forward);
+		ros::param::get("/controller/sidemove_PID", sidemove);
+		ros::param::get("/controller/heading_PID", heading);
+		ros::param::get("/controller/depth_PID", depth);
+		ros::param::get("/controller/pitch_PID", pitch);
+		ros::param::get("/controller/roll_PID", roll);
 		heading = heading || controlUI->ui.yaw_check->isChecked();
 		forward = forward || controlUI->ui.fwd_check->isChecked();
 		depth = depth || controlUI->ui.depth_check->isChecked();
@@ -554,7 +554,7 @@ void fire() {
 		//controlClient.call(srv);
 		controlUI->updatePIDChecks(depth, heading, forward, sidemove, roll, pitch);
 		srv_req.config = conf;
-		ros::service::call("/Controller/set_parameters", srv_req, srv_resp);
+		ros::service::call("/controller/set_parameters", srv_req, srv_resp);
 
 		controlUI->ui.statusbar->showMessage("Goal setpoint sent!", 3000);
 	}
@@ -576,7 +576,7 @@ void activeCb() {
 
 // Called every time feedback is received for the goal
 void feedbackCb(const srmauv_msgs::ControllerFeedbackConstPtr& feedback) {
-	//ROS_INFO("Got Feedback of length %i", feedback->thruster);
+	ROS_INFO("Got Feedback of length");
 }
 
 // Send the advanced parameters
@@ -591,12 +591,12 @@ void sendButton(){
 		dynamic_reconfigure::Config conf;
 
 		bool forward, sidemove, heading, depth, pitch, roll;
-		ros::param::get("/Controller/forward_PID", forward);
-		ros::param::get("/Controller/sidemove_PID", sidemove);
-		ros::param::get("/Controller/heading_PID", heading);
-		ros::param::get("/Controller/depth_PID", depth);
-		ros::param::get("/Controller/pitch_PID", pitch);
-		ros::param::get("/Controller/roll_PID", roll);
+		ros::param::get("/controller/forward_PID", forward);
+		ros::param::get("/controller/sidemove_PID", sidemove);
+		ros::param::get("/controller/heading_PID", heading);
+		ros::param::get("/controller/depth_PID", depth);
+		ros::param::get("/controller/pitch_PID", pitch);
+		ros::param::get("/controller/roll_PID", roll);
 		heading = heading || controlUI->ui.yaw_check->isChecked();
 		forward = forward || controlUI->ui.fwd_check->isChecked();
 		depth = depth || controlUI->ui.depth_check->isChecked();
@@ -627,8 +627,8 @@ void sendButton(){
 
 		srv_req.config = conf;
 		controlUI->ui.statusbar->showMessage("Status: Waiting for dynamic reconfigure service", 3000);
-		ros::service::waitForService("/Controller/set_parameters", ros::Duration(0.5));
-		ros::service::call("/Controller/set_parameters", srv_req, srv_resp);
+		ros::service::waitForService("/controller/set_parameters", ros::Duration(0.5));
+		ros::service::call("/controller/set_parameters", srv_req, srv_resp);
 		controlUI->ui.statusbar->showMessage("Advanced goals sent!", 3000);
 	}
 }
@@ -657,8 +657,8 @@ void tuneButton(){
 
 		srv_req.config = conf;
 		controlUI->ui.statusbar->showMessage("Status: Waiting for dynamic reconfigure service", 3000);
-		ros::service::waitForService("/Controller/set_parameters", ros::Duration(0.5));
-		ros::service::call("/Controller/set_parameters", srv_req, srv_resp);
+		ros::service::waitForService("/controller/set_parameters", ros::Duration(0.5));
+		ros::service::call("/controller/set_parameters", srv_req, srv_resp);
 		controlUI->autoSave();
 		controlUI->loadDynamicParams();
 		controlUI->loadControlParams();
@@ -756,11 +756,11 @@ void updateIncomingParams() {
 		string strVal = "";
 		if (paramsTypes[i%5] == "double_t") {
 			double val = 0.0;
-			ros::param::getCached("/Controller/" + dynamicParams[i], val);
+			ros::param::getCached("/controller/" + dynamicParams[i], val);
 			strVal = boost::lexical_cast<string>(val);
 		} else if (paramsTypes[i%5] == "int_t") {
 			int val = 0;
-			ros::param::getCached("/Controller/" + dynamicParams[i], val);
+			ros::param::getCached("/controller/" + dynamicParams[i], val);
 			strVal = boost::lexical_cast<string>(val);
 		}
 
