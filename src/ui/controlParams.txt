@@ -1,8 +1,8 @@
-depth_Kp: 1
-depth_Ti: 1
+depth_Kp: 1.2
+depth_Ti: 0
 depth_Td: 0
-depth_min: -400
-depth_max: 400
+depth_min: -4000
+depth_max: 4000
 pitch_Kp: 200
 pitch_Ti: 0
 pitch_Td: 300

@@ -266,8 +266,8 @@ int main (int argc,char **argv){
 			pidInfo.depth.p=depthPID.getProportional();
 			pidInfo.depth.i=depthPID.getIntegral();
 			pidInfo.depth.d=depthPID.getIntegral();
-			pidInfo.depth.total=depth_output;	
-			
+			pidInfo.depth.total=depth_output;
+			ROS_INFO("P: %d\tI:%d\tD:%d\t total: %d\n",depthPID.getProportional(),depthPID.getIntegral(),depthPID.getDerivative(),depthPID.getTotal());
 			
 		}
 		else{
@@ -457,14 +457,22 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 	depthPID.setKp(config.depth_Kp);
 	depthPID.setTd(config.depth_Td);
 	depthPID.setTi(config.depth_Ti);
+	depthPID.setActuatorSatModel(config.depth_min,config.depth_max);
+
+        pitchPID.setKp(config.pitch_Kp);
+        pitchPID.setTd(config.pitch_Td);
+        pitchPID.setTi(config.pitch_Ti);
+        pitchPID.setActuatorSatModel(config.pitch_min,config.pitch_max);
 
 	headingPID.setKp(config.heading_Kp);
 	headingPID.setTd(config.heading_Td);
 	headingPID.setTi(config.heading_Ti);
+        headingPID.setActuatorSatModel(config.heading_min,config.heading_max);
 
         rollPID.setKp(config.roll_Kp);
         rollPID.setTd(config.roll_Td);
         rollPID.setTi(config.roll_Ti);
+        rollPID.setActuatorSatModel(config.roll_min,config.roll_max);
 
         //forwardPID.setKp(config.forward_Kp);
      //   forwardPID.setTd(config.forward_Td);

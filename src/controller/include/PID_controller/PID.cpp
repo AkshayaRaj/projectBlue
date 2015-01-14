@@ -73,7 +73,7 @@ namespace srmauv{
 		double dt=nowTime.nsec-oldTime.nsec;
 		double Tt=sqrt(Ti*Td);
 
-		oldTime>nowTime ? dt=(nowTime.nsec+1000000000-oldTime.nsec)/1000000 : 
+		oldTime.nsec>nowTime.nsec ? dt=(nowTime.nsec+1000000000-oldTime.nsec)/1000000 :
 					dt=nowTime.nsec/1000000;
 		_proportional=Kp*(setpoint-input);
 		//the following is setpoint weighting and bandwidth limitation for derivative:
@@ -107,6 +107,7 @@ namespace srmauv{
 	}
 
 	sednaPID::~sednaPID(){
+
 		}
 
 
