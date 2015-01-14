@@ -288,6 +288,9 @@ int main (int argc,char **argv){
 			headingPID.clearIntegrator();
 		}
 
+		setHorizontalThrustSpeed(heading_output,forward_output,sidemove_output);
+		setVerticalThrustSpeed(depth_output,pitch_output,roll_ouput);
+
 		controllerPub.publish(ctrl);
 		pid_infoPub.publish(pidInfo);
 		thrusterPub.publish(thrusterSpeed);
@@ -421,6 +424,9 @@ void mapVerticalThrusters(){
 
 void callback(controller::controllerConfig &config, uint32_t level) {
 	ROS_INFO("Reconfigure Request");
+
+	ctrl.depth_input=config.depth_input;
+
 	thruster1_ratio=config.thruster1_ratio;
 	thruster2_ratio=config.thruster2_ratio;
 	thruster3_ratio=config.thruster3_ratio;
@@ -432,10 +438,13 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 
 
 
+	inForwardPID=config.forward_PID;
+	inSidemovePID=config.sidemove_PID;
 	inDepthPID=config.depth_PID;
 	inHeadingPID=config.heading_PID;
 	inPitchPID=config.pitch_PID;
 	inRollPID=config.roll_PID;
+
 
 	inTeleop=config.teleop;
 	inHovermode=config.hovermode;
@@ -456,6 +465,10 @@ void callback(controller::controllerConfig &config, uint32_t level) {
         rollPID.setKp(config.roll_Kp);
         rollPID.setTd(config.roll_Td);
         rollPID.setTi(config.roll_Ti);
+
+        //forwardPID.setKp(config.forward_Kp);
+     //   forwardPID.setTd(config.forward_Td);
+     //   forwardPID.setTi(config.forward_Ti);
 
 
 
