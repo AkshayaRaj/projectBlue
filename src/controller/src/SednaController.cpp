@@ -3,6 +3,7 @@
 #define LARGE_RANGE 300
 #define SMALL_RANGE 200
 #define SAFETY_RANGE 400
+#define SEABOTIX_LIMIT 255
 
 #include "PID.h"
 #include <ros/ros.h>
@@ -80,8 +81,8 @@ float interpolateDepth(float);
 void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemovePID_output);
 void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output);
 double fmap (int input, int in_min, int in_max, int out_min, int out_max);
-void mapHorizontalThrusters();
-void mapVerticalThrusters();
+
+int  limitSeabotix(int speed);
 
 
 //State Machines : 
@@ -340,8 +341,18 @@ void getOrientation(const sensor_msgs::Imu::ConstPtr& msg){
 	ctrl.heading_input=yaw;
 	ctrl.pitch_input=pitch;
 	ctrl.roll_input=roll;
-	int x=5;
-	ROS_INFO("%f\t%f\t%f\t",yaw,pitch,roll);
+	//int x=5;
+	//ROS_INFO("%f\t%f\t%f\t",yaw,pitch,roll);
+
+
+}
+
+int limitSeabotix(int speed){
+  if (speed>SEABOTIX_LIMIT)
+    speed=SEABOTIX_LIMIT;
+  else if(speed<-SEABOTIX_LIMIT)
+    speed=-SEABOTIX_LIMIT;
+  return speed;
 
 
 }
@@ -353,9 +364,19 @@ double fmap(int input, int in_min, int in_max, int out_min, int out_max){
 }
 
 
+
+
 void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemovePID_output)
 {
   //write code for forward movement
+
+  double speed1_output=(int)thruster1_ratio*(teleop_velocity.forward);
+  double speed2_output=(int)thruster2_ratio*(teleop_velocity.forward);
+  thrusterSpeed.speed1=limitSeabotix(speed1_output);
+  thrusterSpeed.speed2=limitSeabotix(speed2_output);
+
+
+
 
 #ifndef REVERSE
   double speed7_output=thruster7_ratio*(-(double)headingPID_output-(sidemovePID_output)-teleop_velocity.sidemove);
@@ -367,6 +388,7 @@ void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,
   double speed8_output=thruster8_ratio*(-(double)headingPID_output-(sidemovePID_output)-teleop_velocity.sidemove);
 #endif
 
+//  speed7_output=fmap(speed7_output,)
   if(speed7_output>SAFETY_RANGE)
     thrusterSpeed.speed7=SAFETY_RANGE;
   else if(speed7_output<-SAFETY_RANGE)
@@ -413,13 +435,6 @@ void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double
 
 }
 
-void mapHorizontalThrusters(){
-
-}
-
-void mapVerticalThrusters(){
-
-}
 
 
 void callback(controller::controllerConfig &config, uint32_t level) {
@@ -474,11 +489,9 @@ void callback(controller::controllerConfig &config, uint32_t level) {
         rollPID.setTi(config.roll_Ti);
         rollPID.setActuatorSatModel(config.roll_min,config.roll_max);
 
-        //forwardPID.setKp(config.forward_Kp);
+     //   forwardPID.setKp(config.forward_Kp);
      //   forwardPID.setTd(config.forward_Td);
      //   forwardPID.setTi(config.forward_Ti);
-
-
 
 
 }
@@ -486,15 +499,9 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 
 
 void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
-  if(msg->enable){
-    inTeleop=true;
-      if(msg->enable_depth){
-
-      }
-  }
-  else{
-    inTeleop=false;
-  }
+ teleop_velocity.sidemove=msg->sidemove_speed;
+ teleop_velocity.forward=msg->forward_speed;
+ teleop_velocity.reverse=msg->reverse_speed;
 }
 
 
