@@ -1,0 +1,9 @@
+bool forward
+bool reverse
+bool strafe_left
+bool strafe_right
+bool time
+
+---
+
+bool success

@@ -77,11 +77,18 @@ void keyDown(const keyboard::KeyConstPtr & key){
   if(key->code==key->KEY_t){
     teleop.enable=!teleop.enable;
   }
+  else if(key->code==key->KEY_u){ //update setpoints to current input
+    teleop.depth_setpoint=depth.depth;
+   // teleop.heading_setpoint=
+
+  }
   else if(key->code==key->KEY_MINUS){
     if(teleop.enable)
     teleop.depth_setpoint--;
     else
       teleop.depth_setpoint=depth.depth;
+    teleop.heading_setpoint=yaw;
+
   }
 
   else if(key->code==key->KEY_EQUALS){

@@ -336,8 +336,13 @@ void getPressure(const std_msgs::Int16 &msg){
 void getOrientation(const sensor_msgs::Imu::ConstPtr& msg){
         tf::Quaternion q;
         double roll,pitch,yaw;
+
+
         tf::quaternionMsgToTF(msg->orientation,q);
-        tf::Matrix3x3(q).getRPY(roll,pitch,yaw);
+      // tf::Matrix3x3(q).getRPY(roll,pitch,yaw);
+       // tf::Matrix3x3(q).getEulerYPR(yaw,pitch,roll);
+        tf::Matrix3x3(q).getEulerZYX(yaw,pitch,roll);
+      //  tf::Matrix3x3(q).
 	ctrl.heading_input=yaw;
 	ctrl.pitch_input=pitch;
 	ctrl.roll_input=roll;

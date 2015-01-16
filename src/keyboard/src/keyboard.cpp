@@ -11,6 +11,7 @@ keyboard::Keyboard::Keyboard(void)
 
 }
 
+
 keyboard::Keyboard::~Keyboard(void)
 {
   SDL_FreeSurface(window);
