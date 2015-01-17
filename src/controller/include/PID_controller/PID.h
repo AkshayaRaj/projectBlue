@@ -21,6 +21,8 @@ public:
 	double computePID(double setpoint,double input);
 	double wrapAngle360(double error,double heading);  //check inputs
 	void clearIntegrator();
+	double getActmin();
+	double getActmax();
 	virtual ~sednaPID();
 
 private:

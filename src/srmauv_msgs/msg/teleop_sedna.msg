@@ -1,4 +1,5 @@
 bool enable
+bool tune
 bool enable_depth
 bool enable_sidemove
 bool enable_heading

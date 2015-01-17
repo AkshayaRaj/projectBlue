@@ -52,6 +52,15 @@ namespace srmauv{
 
 	}
 
+	double sednaPID::getActmin(){
+	  return actMin;
+
+	}
+
+	double sednaPID::getActmax(){
+	  return actMax;
+	}
+
 
 	double  sednaPID::actuatorConstrain(double val){
 		//this fn will return  val  provided
@@ -71,22 +80,36 @@ namespace srmauv{
 	 	ros::Time nowTime=ros::Time::now();
 		double output;
 		double dt=nowTime.nsec-oldTime.nsec;
+
 		double Tt=sqrt(Ti*Td);
 
 		oldTime.nsec>nowTime.nsec ? dt=(nowTime.nsec+1000000000-oldTime.nsec)/1000000 :
 					dt=nowTime.nsec/1000000;
+
 		_proportional=Kp*(setpoint-input);
+
 		//the following is setpoint weighting and bandwidth limitation for derivative:
-		_derivative=(Td/(Td+N*dt))*(_derivative-Kp*N*(input-inputOld));
+		//_derivative=(Td/(Td+N*dt))*(_derivative-Kp*N*(input-inputOld));
+		_derivative=0;
 			
 		_total=_proportional+_derivative+_integral;
 
 		//apply constrains to output: 
 		output=actuatorConstrain(_total);
+		 ROS_DEBUG("n: %s P: %2.f, I: %2.f, D: %2.f, dt: %2.2f, err: %6.2f",_name.c_str(),_proportional,_integral, _derivative,dt,setpoint - input);
+
 		
 		//Integral with wind-up protection: 
-		Ti? _integral+=(Kp*dt*(setpoint-input))/Ti+ (output-_total)*dt/Tt :
+		if(Ti)
+		 // _integral+=(Kp*dt*(setpoint-input))/Ti+ (output-_total)*dt/Tt ;
+		  _integral+=Ti*(setpoint-input);
+		else
 				_integral=0; //incase Ti is reconfgured
+		if (_integral>actMax)
+		  _integral=actMax;
+		else if(_integral<actMin){
+		  _integral=actMin;
+		}
 
 		oldTime=nowTime;
 		inputOld=input;

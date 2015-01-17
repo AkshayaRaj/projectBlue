@@ -34,6 +34,7 @@
 #include <srmauv_msgs/controller.h>
 #include <srmauv_msgs/locomotion_mode.h>
 #include <srmauv_msgs/thruster.h>
+#include <geometry_msgs/Pose2D.h>
 //this will be calibrated from the sensor
 const static int loop_frequency=20;
 const static int PSI30 = 206842;
@@ -70,6 +71,7 @@ struct teleop_speed{
 
 void getVisionSidemove(const std_msgs::Int16& msg);
 void getOrientation(const sensor_msgs::Imu::ConstPtr& msg);
+void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg);
 void getPressure(const std_msgs::Int16& msg);
 //void getTeleop(const srmauv_msgs::thruster::ConstPtr& msg);
 void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg);
@@ -81,6 +83,7 @@ float interpolateDepth(float);
 void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemovePID_output);
 void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output);
 double fmap (int input, int in_min, int in_max, int out_min, int out_max);
+
 
 int  limitSeabotix(int speed);
 
@@ -109,6 +112,7 @@ ros::Subscriber earthSub;
 ros::Subscriber teleopSub;
 ros::Subscriber autonomousSub; // ~
 ros::Subscriber velocitySub;
+ros::Subscriber headingSub;
 
 srmauv::sednaPID depthPID("d",1.2,0,0,20);
 srmauv::sednaPID headingPID("h",1.2,0,0,20);
@@ -128,8 +132,6 @@ int act_heading[2];
 int loc_mode_forward[4] = {-LARGE_RANGE,LARGE_RANGE,-SMALL_RANGE,SMALL_RANGE};
 int loc_mode_sidemove[4] = {-SMALL_RANGE,SMALL_RANGE,-LARGE_RANGE,LARGE_RANGE};
 int loc_mode_heading[4] = {-SMALL_RANGE,SMALL_RANGE,-SMALL_RANGE,SMALL_RANGE};
-
-int  manual_speed[6]={0,0,0,0,0,0};
 
 
 
@@ -209,11 +211,15 @@ int main (int argc,char **argv){
 
 	ros::NodeHandle nh;
 	
+	teleop.tune=true;
+
+
 	thrusterPub=nh.advertise<srmauv_msgs::thruster>("/thruster_speed",1000);
 	depthPub=nh.advertise<srmauv_msgs::depth>("/depth",1000);
 	controllerPub=nh.advertise<srmauv_msgs::controller>("/controller_targets",100);   // verified with tuining_ui
 	locomotionModePub=nh.advertise<std_msgs::Int8>("/locomotion_mode",100,true);
 	pid_infoPub=nh.advertise<srmauv_msgs::pid_info>("/pid_info",1000);   // verified with tuining_ui
+	  headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
 
 	//subscribers: 
 
@@ -343,7 +349,7 @@ void getOrientation(const sensor_msgs::Imu::ConstPtr& msg){
        // tf::Matrix3x3(q).getEulerYPR(yaw,pitch,roll);
         tf::Matrix3x3(q).getEulerZYX(yaw,pitch,roll);
       //  tf::Matrix3x3(q).
-	ctrl.heading_input=yaw;
+	//ctrl.heading_input=yaw;
 	ctrl.pitch_input=pitch;
 	ctrl.roll_input=roll;
 	//int x=5;
@@ -352,13 +358,22 @@ void getOrientation(const sensor_msgs::Imu::ConstPtr& msg){
 
 }
 
+void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg){
+  ctrl.heading_input=msg->theta;
+}
+
+
 int limitSeabotix(int speed){
+  /*
   if (speed>SEABOTIX_LIMIT)
     speed=SEABOTIX_LIMIT;
   else if(speed<-SEABOTIX_LIMIT)
     speed=-SEABOTIX_LIMIT;
   return speed;
+*/
 
+  int out=(int)fmap(speed,(int)headingPID.getActmin(),(int)headingPID.getActmax(),-255,255);
+  return out;
 
 }
 
@@ -445,6 +460,9 @@ void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double
 void callback(controller::controllerConfig &config, uint32_t level) {
 	ROS_INFO("Reconfigure Request");
 
+	if(teleop.tune){
+	  ROS_INFO("Tuner Enabled");
+
 	ctrl.depth_input=config.depth_input;
 
 	thruster1_ratio=config.thruster1_ratio;
@@ -497,7 +515,7 @@ void callback(controller::controllerConfig &config, uint32_t level) {
      //   forwardPID.setKp(config.forward_Kp);
      //   forwardPID.setTd(config.forward_Td);
      //   forwardPID.setTi(config.forward_Ti);
-
+	}
 
 }
 
@@ -506,7 +524,12 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
  teleop_velocity.sidemove=msg->sidemove_speed;
  teleop_velocity.forward=msg->forward_speed;
- teleop_velocity.reverse=msg->reverse_speed;
+ teleop.tune=msg->tune;
+ if(!teleop.tune){
+   ctrl.depth_setpoint=msg->depth_setpoint;
+   ctrl.heading_setpoint=msg->heading_setpoint;
+ }
+
 }
 
 
