@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="controller" name="controller" type="PID_Controller"/>
+	<node pkg="keyboard" name="teleop" type="teleop_sedna"/>
+</launch>

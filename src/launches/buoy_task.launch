@@ -1,0 +1,5 @@
+<launch>
+  <node name="buoy_detector" pkg="vision" type="buoy_task.py" respawn="true">
+    <param name="front_camera_topic" type="string" value="/sedna/camera/front/image_raw"/>
+  </node>
+</launch> 

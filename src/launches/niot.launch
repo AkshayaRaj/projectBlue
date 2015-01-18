@@ -1,0 +1,9 @@
+<launch>
+
+	<!--launch PID controller-->
+        <include file="$(find launches)/controller.launch" />
+
+	<!--launch front and bottom lifecam-->
+	<include file="$(find launches)/bottom_usb_cam.launch" />
+        <include file="$(find launches)/front_usb_cam.launch" />
+</launch>

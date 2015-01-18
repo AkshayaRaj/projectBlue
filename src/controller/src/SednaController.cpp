@@ -409,17 +409,17 @@ void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,
 #endif
 
 //  speed7_output=fmap(speed7_output,)
-  if(speed7_output>SAFETY_RANGE)
-    thrusterSpeed.speed7=SAFETY_RANGE;
-  else if(speed7_output<-SAFETY_RANGE)
-    thrusterSpeed.speed7=-SAFETY_RANGE;
+  if(speed7_output>SEABOTIX_LIMIT)
+    thrusterSpeed.speed7=SEABOTIX_LIMIT;
+  else if(speed7_output<-SEABOTIX_LIMIT)
+    thrusterSpeed.speed7=-SEABOTIX_LIMIT;
   else
     thrusterSpeed.speed7=speed7_output;
 
-  if(speed8_output>SAFETY_RANGE)
-    thrusterSpeed.speed8=SAFETY_RANGE;
-  else if(speed8_output<-SAFETY_RANGE)
-    thrusterSpeed.speed8=-SAFETY_RANGE;
+  if(speed8_output>SEABOTIX_LIMIT)
+    thrusterSpeed.speed8=SEABOTIX_LIMIT;
+  else if(speed8_output<-SEABOTIX_LIMIT)
+    thrusterSpeed.speed8=-SEABOTIX_LIMIT;
   else
     thrusterSpeed.speed8=speed8_output;
 
