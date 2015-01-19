@@ -1,0 +1,86 @@
+=============================================================================
+        Usage
+=============================================================================
+
+First start the USB-over-Network Server:
+
+  $ sudo /path/to/ftusbnetd
+
+Normally, the server starts in a non-debug mode and is not daemonized.  In this
+mode you can stop the server by pressing Ctrl+C in your terminal window. 
+
+To start server in daemon mode use '-d' option.  You will normally need this
+option in shell scripts (e.g. if you'd like to start the server every time on
+system boot). To learn how to run the server automatically on system start
+please refer to your Linux distribution manual.
+
+Daemon management can be done with a configuration file (for persistent changes)
+or via the command line utility.
+
+=============================================================================
+        Command Line Utility
+=============================================================================
+
+Run the command line utility:
+
+  $ /path/to/ftusbnetctl <command> [options]
+
+To see the list of all supported commands, run:
+
+  $ /path/to/ftusbnetctl help
+
+To see the list of the devices available:
+
+  $ /path/to/ftusbnetctl list 
+  ID         VID: PID: REV           Location  Device name and status 
+  107        07d1:3c03:0001               1-2  802.11 bg WLAN /Shared/ 
+  202        046d:c045:2730               2-1  USB Optical Mouse /Unshared/
+
+Here the columns are:
+
+  ID - unique device identifier 
+  VID:PID:REV - device hardware identifier (vendor ID, product ID, revision)
+	Location - USB device topology (can be "unknown" if your system cannot report
+             the device topology)
+	Device name and status  - displays the name of the device and its current
+	           status (shared/unshared/occupied)
+
+You can share the device by its unique ID (an example below shows how to share
+USB Optical Mouse from the list above):
+
+  $ /path/to/ftusbnetctl share 202
+
+NOTE: Sharing by the device ID allows you to share separately one of the
+devices that have identical VID:PID:REV.
+
+To unshare the device use "unshare" command with the same syntax as "share":
+
+  $ /path/to/ftusbnetctl unshare 202
+
+
+=============================================================================
+        Configuration File
+=============================================================================
+
+By default the 'ftusbnetd' daemon looks for the configuration file at
+'/etc/ftusbnet.conf'. Alternatively, you can specify a custom location with
+'-c' option:
+
+  $ sudo /path/to/ftusbnetd -c /path/to/ftusbnet.conf
+
+See the configuration file usage details in the default configuration file
+"ftusbnet.conf" that is included in the product package.
+
+
+=============================================================================
+        Converting Trial to Full Version
+=============================================================================
+
+By default "ftusbnetd" daemon searches for the license key in the following
+file "/etc/license.key". You should create this file and paste your license
+key in it (including the "BEGIN" and "END" lines). Alternatively, you can
+specify a custom location of the license key file with the help of '-k'
+option:
+
+  $ sudo /path/to/ftusbnetd -k /path/to/license.key.file
+
