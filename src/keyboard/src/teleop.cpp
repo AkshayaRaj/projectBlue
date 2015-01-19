@@ -138,6 +138,12 @@ void keyDown(const keyboard::KeyConstPtr & key){
       teleop.depth_setpoint=depth.depth;
 
   }
+  else if(key->code==key->KEY_PAGEUP){
+    teleop.torpedo=true;
+  }
+  else if(key->code==key->KEY_PAGEDOWN){
+    teleop.dropper=true;
+  }
 
   else if(key->code==key->KEY_LEFTBRACKET){
     if(teleop.enable)
@@ -249,5 +255,12 @@ void keyUp(const keyboard::KeyConstPtr& key){
     }
 
   }
+  else if(key->code==key->KEY_PAGEUP){
+     teleop.torpedo=false;
+   }
+   else if(key->code==key->KEY_PAGEDOWN){
+     teleop.dropper=false;
+   }
+
 
 }
