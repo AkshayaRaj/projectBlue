@@ -1,6 +1,11 @@
 #!/bin/bash
 
-source ~/srmauv/devel/setup.bash
+echo "This is $(hostname)"
+if[$(hostname) = auv ]; then
+	source ~/srmauv/projectBlue/devel/setup.bash
+else
+	source ~/srmauv/devel/setup.bash
+fi
 
 roscd srmauv_msgs
 cd srv
