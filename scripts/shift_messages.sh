@@ -17,7 +17,8 @@ cd ../action
 cp -f *.action bkp
 rm *.action
 
-cd ~/srmauv/scripts
+roscd srmauv_msgs
+cd ../../scripts
 source generate_msgs.sh 
 
 roscd srmauv_msgs 
