@@ -1,5 +1,5 @@
-SUBSYSTEM=="tty" ATTRS{manufacturer}=="Arduino*" SYMLINK+="uno%n"
-SUBSYSTEM=="tty"  ATTRS{serial}=="9523234383335130A0A1" ATTRS{manufacturer}=="Arduino*"  SYMLINK+="mega%n"
+SUBSYSTEM=="tty" ATTRS{serial}=="74937303836351700181" ATTRS{manufacturer}=="Arduino*" SYMLINK+="uno"
+SUBSYSTEM=="tty"  ATTRS{serial}=="9523234383335130A0A1" ATTRS{manufacturer}=="Arduino*"  SYMLINK+="mega"
 
 SUBSYSTEM=="video4linux" ATTRS{manufacturer}=="Microsoft" ATTRS{idProduct}=="075d" ATTRS{devnum}=="12" SYMLINK+="lifecam1"
 SUBSYSTEM=="video4linux" ATTRS{manufacturer}=="Microsoft" ATTRS{idProduct}=="075d" ATTRS{devnum}=="11" SYMLINK+="lifecam2"
