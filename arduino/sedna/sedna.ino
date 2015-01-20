@@ -150,6 +150,7 @@ void initTopics(){
 void readPressure(){
   int new_pressure=analogRead(PRESSURE_1);
   pressure=pressure+ LPF_CONSTANT*(float)(new_pressure-pressure);
+  depth.depth=pressure;
 }
 
 void readWater(){

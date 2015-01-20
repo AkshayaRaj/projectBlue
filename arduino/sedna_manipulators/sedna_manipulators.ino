@@ -11,7 +11,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, NEOPIXEL, NEO_GRB + NEO_KHZ800);
 
 static uint32_t currentTime,loopTime, slow_loop;
 
-ros::NodeHandle(nh);
+ros::NodeHandle nh;
 
 std_msgs::Bool emergency;
 
@@ -39,12 +39,12 @@ void setup(){
 }
 
 void loop(){
-        currentTime=millis();
-         if(currentTime>=(slow_loop+333)){
+       // currentTime=millis();
+    //     if(currentTime>=(slow_loop+333)){
         nh.spinOnce();
 
-        slow_loop=currentTime;
-  }
+ //       slow_loop=currentTime;
+ // }
 
 
 }
