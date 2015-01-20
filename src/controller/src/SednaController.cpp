@@ -392,20 +392,32 @@ void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,
 
   double speed1_output=(int)thruster1_ratio*(teleop_velocity.forward);
   double speed2_output=(int)thruster2_ratio*(teleop_velocity.forward);
-  thrusterSpeed.speed1=limitSeabotix(speed1_output);
-  thrusterSpeed.speed2=limitSeabotix(speed2_output);
+  
+if(speed1_output>SEABOTIX_LIMIT)
+    thrusterSpeed.speed1=SEABOTIX_LIMIT;
+  else if(speed1_output<-SEABOTIX_LIMIT)
+    thrusterSpeed.speed1=-SEABOTIX_LIMIT;
+  else
+    thrusterSpeed.speed1=speed1_output;
+
+  if(speed2_output>SEABOTIX_LIMIT)
+    thrusterSpeed.speed2=SEABOTIX_LIMIT;
+  else if(speed2_output<-SEABOTIX_LIMIT)
+    thrusterSpeed.speed2=-SEABOTIX_LIMIT;
+  else
+    thrusterSpeed.speed2=speed2_output;
 
 
 
 
 #ifndef REVERSE
-  double speed7_output=thruster7_ratio*(-(double)headingPID_output-(sidemovePID_output)-teleop_velocity.sidemove);
-  double speed8_output=thruster8_ratio*((double)headingPID_output-(sidemovePID_output)-teleop_velocity.sidemove);
+  double speed7_output=thruster7_ratio*(-(double)limitSeabotix(headingPID_output)-(sidemovePID_output)-teleop_velocity.sidemove);
+  double speed8_output=thruster8_ratio*((double)limitSeabotix(headingPID_output)-(sidemovePID_output)-teleop_velocity.sidemove);
 #endif
 
 #ifdef REVERSE
-  double speed7_output=thruster7_ratio*((double)headingPID_output-(sidemovePID_output)-teleop_velocity.sidemove);
-  double speed8_output=thruster8_ratio*(-(double)headingPID_output-(sidemovePID_output)-teleop_velocity.sidemove);
+  double speed7_output=thruster7_ratio*((double)limitSeabotix(headingPID_output)-(sidemovePID_output)-teleop_velocity.sidemove);
+  double speed8_output=thruster8_ratio*(-(double)limitSeabotix(headingPID_output)-(sidemovePID_output)-teleop_velocity.sidemove);
 #endif
 
 //  speed7_output=fmap(speed7_output,)
