@@ -6,6 +6,7 @@
 #include <std_msgs/Bool.h>
 #include <Adafruit_NeoPixel.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Int16.h>
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, NEOPIXEL, NEO_GRB + NEO_KHZ800);
 
@@ -13,7 +14,8 @@ static uint32_t currentTime,loopTime, slow_loop;
 
 ros::NodeHandle nh;
 
-std_msgs::Bool emergency;
+
+
 
 //Function Prototypes **************
 void emergencyCallback(const std_msgs::Bool &msg);
@@ -24,7 +26,7 @@ void emergencyCallback(const std_msgs::Bool &msg);
 
 
 //Subscribers *************
-ros::Subscriber<std_msgs::Bool> emergency_sub("/emergency",emergencyCallback);
+ros::Subscriber<std_msgs::Bool> emergency_sub("emergency",emergencyCallback);
 
 
 
@@ -36,8 +38,10 @@ void setup(){
   digitalWrite(TORPEDO,LOW);
   digitalWrite(DROPPER,LOW);
   
-  initLights();
+  
   nh.initNode();
+  initLights();
+  
   initTopics();
 }
 
@@ -45,6 +49,7 @@ void loop(){
        // currentTime=millis();
     //     if(currentTime>=(slow_loop+333)){
         nh.spinOnce();
+        
 
  //       slow_loop=currentTime;
  // }
@@ -53,6 +58,11 @@ void loop(){
 }
 
 void initLights(){
+   strip.begin();
+  strip.show(); // Initialize all pixels to 'off'
+  //  colorWipeFull(strip.Color(0, 255, 0), 50); // Green
+  blink(0,255,0,2);
+  
   
     
 }
@@ -67,6 +77,7 @@ void blink(int r,int g,int b,int times){
   colorWipe(strip.Color(r, g, b), 50);
   delay(400);
   colorWipe(strip.Color(0, 0, 0), 50);
+  }
   
 }
 
@@ -78,18 +89,24 @@ void colorWipe(uint32_t c, uint8_t wait) {
   }
 }
 
+void colorWipeFull(uint32_t c, uint8_t wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, c);
+      strip.show();
+      delay(wait);
+  }
+}
 
 
 
 
 void emergencyCallback(const std_msgs::Bool &msg){
-        if(emergency.data){
-                while(true){
-                 colorWipe(strip.Color(255, 0, 0), 50);
-                 delay(100);
-                 colorWipe(strip.Color(0, 0, 0), 50);
+        if(msg.data==true){
+               while(true){
+                   blink(255,0,0,2);
                 }
-        }
+                
+     
 }
 
 
