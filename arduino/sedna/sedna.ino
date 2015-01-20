@@ -35,6 +35,8 @@ void setup(){
   s4.attach(TH4);
   s5.attach(TH5);
   s6.attach(TH6);
+  pinMode(LCD,OUTPUT);
+  digitalWrite(LCD,LOW);
   enableThrusters();
   initThrusters();
   initPressure();

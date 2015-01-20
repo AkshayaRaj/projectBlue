@@ -24,6 +24,7 @@
 #define PRESSURE_1 12
 #define PRESSURE_2 14
 #define LEAK_SENSOR 17
+#define LCD 44
 
 
 #define LPF_CONSTANT 0.7
