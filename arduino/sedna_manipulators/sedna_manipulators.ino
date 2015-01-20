@@ -35,6 +35,9 @@ void setup(){
   pinMode(DROPPER,OUTPUT);
   digitalWrite(TORPEDO,LOW);
   digitalWrite(DROPPER,LOW);
+  
+  initLights();
+  nh.initNode();
   initTopics();
 }
 
@@ -49,9 +52,22 @@ void loop(){
 
 }
 
+void initLights(){
+  
+    
+}
+
 void initTopics(){
         nh.subscribe(emergency_sub);
 
+}
+
+void blink(int r,int g,int b,int times){
+  for(int i=0;i<times;i++){
+  colorWipe(strip.Color(r, g, b), 50);
+  delay(400);
+  colorWipe(strip.Color(0, 0, 0), 50);
+  
 }
 
 void colorWipe(uint32_t c, uint8_t wait) {

@@ -37,6 +37,7 @@ void setup(){
   s6.attach(TH6);
   pinMode(LCD,OUTPUT);
   digitalWrite(LCD,LOW);
+  nh.initNode();
   enableThrusters();
   initThrusters();
   initPressure();
