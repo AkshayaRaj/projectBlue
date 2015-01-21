@@ -1,25 +1,33 @@
-#define TH1 10
-#define TH2 11
-#define TH3 3
-#define TH4 4
-#define TH5 5
+#define TH1 4
+#define TH2 3
+#define TH3 8
+#define TH4 9
+#define TH5 7
 #define TH6 6
-#define TH7 13
-#define TH8 15
+#define TH7 2
+#define TH8 5
 
-#define TH1_REV 1
-#define TH2_REV 2
-#define TH7_REV 7
-#define TH8_REV 8
+#define TH1_F 30
+#define TH1_R 33
 
-#define R1
-#define R2
-#define R3
-#define R4
-#define R5
-#define R6
-#define R7
-#define R8
+#define TH2_F 26
+#define TH2_R 29
+
+#define TH7_F 22
+#define TH7_R 25
+
+#define TH8_F 34
+#define TH8_R 37
+
+#define TORPEDO 42
+#define DROPPER 43
+
+#define RELAY1 38
+#define RELAY2 39
+#define RELAY3 41
+
+
+
 
 #define PRESSURE_1 12
 #define PRESSURE_2 14

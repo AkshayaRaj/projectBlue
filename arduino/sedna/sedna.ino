@@ -16,7 +16,11 @@ int pressure;
 ros::NodeHandle(nh);
 
 
-Servo s3,s4,s5,s6;
+Servo s3;
+Servo s4;
+Servo s5;
+Servo s6;
+
 
 srmauv_msgs::depth depth;
 srmauv_msgs::thruster thruster;
@@ -26,20 +30,22 @@ void collectThruster(const srmauv_msgs::thruster &msg);
 
 ros::Publisher depth_pub("/depth",&depth);
 ros::Publisher emergency_pub("/emergency",&emergency);
-ros::Subscriber<srmauv_msgs::thruster>thruster_sub("/thrusterSpeed",collectThruster);
+ros::Subscriber<srmauv_msgs::thruster>thruster_sub("/thruster_speed",collectThruster);
 
 
 
 void setup(){
+  delay(500);
   s3.attach(TH3);  
   s4.attach(TH4);
   s5.attach(TH5);
   s6.attach(TH6);
+  initThrusters();
   pinMode(LCD,OUTPUT);
   digitalWrite(LCD,LOW);
   nh.initNode();
   enableThrusters();
-  initThrusters();
+  enableManipulators();
   initPressure();
   initTopics();
   time_elapsed=0;
@@ -82,19 +88,55 @@ void loop(){
   
 }
 
+void enableManipulators(){
+  pinMode(TORPEDO,OUTPUT);
+  pinMode(DROPPER,OUTPUT);
+  digitalWrite(TORPEDO,LOW);
+  digitalWrite(DROPPER,LOW);
+  delay(1000);
+  digitalWrite(TORPEDO,HIGH);
+  digitalWrite(DROPPER,HIGH);
+}
 
 void initThrusters(){
  
-  s3.write(1500);
-  s4.write(1500);
-  s5.write(1500);
-  s6.write(1500);
-  pinMode(TH1_REV,OUTPUT);
-  pinMode(TH2_REV,OUTPUT);
-  pinMode(TH7_REV,OUTPUT);
-  pinMode(TH8_REV,OUTPUT);
+  //active low seabotix relays:
+  pinMode(RELAY1,OUTPUT);
+  pinMode(RELAY2,OUTPUT);
+  pinMode(RELAY3,OUTPUT);
   
-  delay(1000);
+  digitalWrite(RELAY1,LOW);
+  digitalWrite(RELAY2,LOW);
+  digitalWrite(RELAY3,LOW);
+  
+  s3.write(1500);
+    delay(50);
+  s4.write(1500);
+    delay(50);
+  s5.write(1500);
+    delay(50);
+  s6.write(1500);
+  delay(50);
+  pinMode(TH1_F,OUTPUT);
+  pinMode(TH2_F,OUTPUT);
+  pinMode(TH7_F,OUTPUT);
+  pinMode(TH8_F,OUTPUT);
+  
+  pinMode(TH1_R,OUTPUT);
+  pinMode(TH2_R,OUTPUT);
+  pinMode(TH7_R,OUTPUT);
+  pinMode(TH8_R,OUTPUT);
+  
+  digitalWrite(TH1_F,1);
+  digitalWrite(TH1_R,0);
+  digitalWrite(TH2_F,1);
+  digitalWrite(TH2_R,0);
+  digitalWrite(TH7_F,1);
+  digitalWrite(TH7_R,0);
+  digitalWrite(TH8_F,1);
+  digitalWrite(TH8_R,0);
+  
+  //delay(1000);
   
 }
 
@@ -103,34 +145,55 @@ void initThrusters(){
 
 void runThrusters(){
   s3.write(1500+thruster.speed3);
+ // delay(10);
   s4.write(1500+thruster.speed4);
+ // delay(10);
   s5.write(1500+thruster.speed5);
+ // delay(10);
   s6.write(1500+thruster.speed6);
+//delay(10);
   
-  if(thruster.speed1<0)
-    digitalWrite(TH1_REV,HIGH);
-  else
-    digitalWrite(TH1_REV,LOW);
-    
-    if(thruster.speed2<0)
-    digitalWrite(TH2_REV,HIGH);
-  else
-    digitalWrite(TH2_REV,LOW);
+  if(thruster.speed1<0){
+    digitalWrite(TH1_F,LOW);  
+    digitalWrite(TH1_R,HIGH);
+  }
+  else if(thruster.speed1>0){
+    digitalWrite(TH1_F,HIGH);  
+    digitalWrite(TH1_R,LOW);
+  }
   
-  if(thruster.speed7<0)
-    digitalWrite(TH7_REV,HIGH);
-  else
-    digitalWrite(TH7_REV,LOW);
+  if(thruster.speed2<0){
+    digitalWrite(TH2_F,LOW);  
+    digitalWrite(TH2_R,HIGH);
+  }
+  else if(thruster.speed2>0){
+    digitalWrite(TH2_F,HIGH);  
+    digitalWrite(TH2_R,LOW);
+  }
+  
+  if(thruster.speed7<0){
+    digitalWrite(TH7_F,LOW);  
+    digitalWrite(TH7_R,HIGH);
+  }
+  else if(thruster.speed7>0){
+    digitalWrite(TH7_F,HIGH);  
+    digitalWrite(TH7_R,LOW);
+  }
+  if(thruster.speed8<0){
+    digitalWrite(TH8_F,LOW);  
+    digitalWrite(TH8_R,HIGH);
+  }
+  else if(thruster.speed8>0){
+    digitalWrite(TH8_F,HIGH);  
+    digitalWrite(TH8_R,LOW);
+  }  
     
-    if(thruster.speed7<0)
-    digitalWrite(TH7_REV,HIGH);
-  else
-    digitalWrite(TH7_REV,LOW);
+    
     
     analogWrite(TH1,abs(thruster.speed1));
     analogWrite(TH2,abs(thruster.speed2));
-    analogWrite(TH3,abs(thruster.speed3));
-    analogWrite(TH4,abs(thruster.speed4));
+    analogWrite(TH7,abs(thruster.speed7));
+    analogWrite(TH8,abs(thruster.speed8));
     
   
   

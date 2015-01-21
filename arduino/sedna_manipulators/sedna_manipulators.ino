@@ -108,5 +108,6 @@ void emergencyCallback(const std_msgs::Bool &msg){
                 
      
 }
+}
 
 
