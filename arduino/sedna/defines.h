@@ -29,13 +29,13 @@
 
 
 
-#define PRESSURE_1 7
-#define PRESSURE_2 2
-#define LEAK_SENSOR 17
+#define PRESSURE_1 7 // US3000 pressure sensor
+#define PRESSURE_2 2  //Switzer pressure sensor
+#define LEAK_SENSOR 0
 #define LCD 44
 
 
 #define LPF_CONSTANT 0.7
-#define WATER_LEAK_THRESH 400
+#define WATER_LEAK_THRESH 900
 #define SURFACE 1400
 

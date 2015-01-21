@@ -219,7 +219,7 @@ void readPressure(){
 }
 
 void readWater(){
- if(analogRead(LEAK_SENSOR)>WATER_LEAK_THRESH) {
+ if(analogRead(LEAK_SENSOR)<WATER_LEAK_THRESH) {
    emergencyMode();
  }
 }

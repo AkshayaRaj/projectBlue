@@ -1,11 +1,13 @@
 <launch>
-        <node  name="mega" pkg="rosserial_python"  type="serial_node.py" >
+       <node  name="mega" pkg="rosserial_python"  type="serial_node.py" >
 		<param name="port" value="/dev/mega" />
-		<param name="baud" value="115200" />
-	</node>
+		<param name="baud" value="57600" />  
+	</node>  
+
+
            <node   name="uno" pkg="rosserial_python"  type="serial_node.py" >
 		<param name="port" value="/dev/uno" />
-		<param name="baud" value="115200" />
+		<param name="baud" value="57600" />
 	</node>		
 
 </launch>
