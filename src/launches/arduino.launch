@@ -1,9 +1,11 @@
 <launch>
-        <node  ns="arduino_mega" name="mega" pkg="rosserial_python"  type="serial_node.py" >
+        <node  name="mega" pkg="rosserial_python"  type="serial_node.py" >
 		<param name="port" value="/dev/mega" />
+		<param name="baud" value="115200" />
 	</node>
-           <node  ns="arduino_uno" name="uno" pkg="rosserial_python"  type="serial_node.py" >
+           <node   name="uno" pkg="rosserial_python"  type="serial_node.py" >
 		<param name="port" value="/dev/uno" />
+		<param name="baud" value="115200" />
 	</node>		
 
 </launch>

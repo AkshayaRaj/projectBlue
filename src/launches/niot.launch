@@ -6,4 +6,11 @@
 	<!--launch front and bottom lifecam-->
 	<include file="$(find launches)/bottom_usb_cam.launch" />
         <include file="$(find launches)/front_usb_cam.launch" />
+
+	<!--launch embedded syatems-->
+	<include file="$(find launches)/arduino.launch" />
+
+	<!--launch AHRS-8-->
+	<include file="$(find SpartonCompassIMU)/AHRS-8.launch" />
+
 </launch>

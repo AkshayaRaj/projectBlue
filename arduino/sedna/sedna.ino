@@ -73,8 +73,9 @@ void loop(){
     depth.depth=pressure;
     depth_pub.publish(&depth);
     
+     nh.spinOnce();
     //assign pressure and publish it
-    nh.spinOnce();
+    
     medium_loop=currentTime;
   }
   currentTime=millis();
@@ -84,7 +85,7 @@ void loop(){
    
    slow_loop=currentTime; 
   }
-  
+ 
   
 }
 
