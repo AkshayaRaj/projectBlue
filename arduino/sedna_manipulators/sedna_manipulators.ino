@@ -15,19 +15,21 @@ static uint32_t currentTime,loopTime, slow_loop;
 ros::NodeHandle nh;
 
 
-
+bool dropperArmed=true;
+bool torpedoArmed=true;
 
 //Function Prototypes **************
 void emergencyCallback(const std_msgs::Bool &msg);
-
-
+void torpedoCallback(const std_msgs::Bool &msg);
+void dropperCallback(const std_msgs::Bool &msg);
 // Publishers *************
 
 
 
 //Subscribers *************
 ros::Subscriber<std_msgs::Bool> emergency_sub("emergency",emergencyCallback);
-
+ros::Subscriber<std_msgs::Bool> torpedo_sub("torpedo",torpedoCallback);
+ros::Subscriber<std_msgs::Bool> dropper_sub("dropper",dropperCallback);
 
 
 
@@ -41,15 +43,17 @@ void setup(){
   
   nh.initNode();
   initLights();
-  
+  initMan();
   initTopics();
 }
 
 void loop(){
        // currentTime=millis();
     //     if(currentTime>=(slow_loop+333)){
+        colorWipeFull(strip.Color(0, 40, 0), 50); 
+       
         nh.spinOnce();
-        
+      
 
  //       slow_loop=currentTime;
  // }
@@ -63,14 +67,21 @@ void initLights(){
   //  colorWipeFull(strip.Color(0, 255, 0), 50); // Green
   blink(0,255,0,2);
   
-  
-    
 }
 
+void initMan(){
+  pinMode(DROPPER,OUTPUT);
+  pinMode(TORPEDO,OUTPUT);
+  digitalWrite(DROPPER,HIGH);
+  digitalWrite(TORPEDO,HIGH);
+}
+  
 void initTopics(){
         nh.subscribe(emergency_sub);
 
 }
+
+
 
 void blink(int r,int g,int b,int times){
   for(int i=0;i<times;i++){
@@ -109,5 +120,26 @@ void emergencyCallback(const std_msgs::Bool &msg){
      
 }
 }
+
+void torpedoCallback(const std_msgs::Bool &msg){
+   if(msg.data==true && torpedoArmed==true){
+     digitalWrite(TORPEDO,LOW);
+     delay(500);
+     digitalWrite(TORPEDO,HIGH);
+     torpedoArmed=false;
+  
+}
+}
+
+void dropperCallback(const std_msgs::Bool &msg){
+   if(msg.data==true && dropperArmed==true){
+     digitalWrite(DROPPER,LOW);
+     delay(500);
+     digitalWrite(DROPPER,HIGH);
+     dropperArmed=false;
+  
+}
+}
+
 
 

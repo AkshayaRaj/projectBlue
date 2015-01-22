@@ -27,7 +27,7 @@ ros::Publisher teleopPub;
 
 void keyUp(const keyboard::KeyConstPtr& key);
 void keyDown(const keyboard::KeyConstPtr& key);
-void getPressure(const std_msgs::Int16 &msg);
+void getPressure(const srmauv_msgs::depth &msg);
 void getOrientation(const sensor_msgs::Imu::ConstPtr &msg);
 void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg);
 void setTeleop(const srmauv_msgs::teleop_sedna::ConstPtr& msg);
@@ -77,8 +77,8 @@ int main(int argc,char** argv){
 
 	return 0;
 }
-void getPressure(const std_msgs::Int16 &msg){
-  depth.depth=msg.data;
+void getPressure(const srmauv_msgs::depth &msg){
+  depth.depth=msg.depth;
 
 }
 

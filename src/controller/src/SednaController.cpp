@@ -72,7 +72,7 @@ struct teleop_speed{
 void getVisionSidemove(const std_msgs::Int16& msg);
 void getOrientation(const sensor_msgs::Imu::ConstPtr& msg);
 void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg);
-void getPressure(const std_msgs::Int16& msg);
+void getPressure(const srmauv_msgs::depth& msg);
 //void getTeleop(const srmauv_msgs::thruster::ConstPtr& msg);
 void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg);
 void callback(controller::controllerConfig &config,uint32_t level);
@@ -215,7 +215,7 @@ int main (int argc,char **argv){
 
 
 	thrusterPub=nh.advertise<srmauv_msgs::thruster>("/thruster_speed",1000);
-	depthPub=nh.advertise<srmauv_msgs::depth>("/depth",1000);
+	//depthPub=nh.advertise<srmauv_msgs::depth>("/depth",1000);
 	controllerPub=nh.advertise<srmauv_msgs::controller>("/controller_targets",100);   // verified with tuining_ui
 	locomotionModePub=nh.advertise<std_msgs::Int8>("/locomotion_mode",100,true);
 	pid_infoPub=nh.advertise<srmauv_msgs::pid_info>("/pid_info",1000);   // verified with tuining_ui
@@ -269,7 +269,7 @@ int main (int argc,char **argv){
 		}
 		if(inDepthPID)
 		{
-			depth_output=depthPID.computePID((double)ctrl.depth_setpoint,ctrl.depth_input);
+			depth_output=depthPID.computePID((double)ctrl.depth_setpoint,ctrl.depth_input)*-1;
 			pidInfo.depth.p=depthPID.getProportional();
 			pidInfo.depth.i=depthPID.getIntegral();
 			pidInfo.depth.d=depthPID.getIntegral();
@@ -328,15 +328,17 @@ double getHeadingPIDUpdate(){
 
 
 
-void getPressure(const std_msgs::Int16 &msg){
+void getPressure(const srmauv_msgs::depth &msg){
 	
 	// the message that is coming is the raw ADC value from the pressure sensor.. lets try to add some filtering to it somewhere else probably
 
-	double depth=(double)interpolateDepth((float)msg.data);
+	double depth=(double)interpolateDepth((float)msg.depth);
 	
-	depthValue.pressure=msg.data;
-	depthValue.depth=depth;
-	ctrl.depth_input=depth;
+	//ROS_INFO("%d",msg.depth);
+
+	depthValue.pressure=msg.depth;
+	depthValue.depth=msg.depth;
+	ctrl.depth_input=msg.depth;
 }
 
 void getOrientation(const sensor_msgs::Imu::ConstPtr& msg){
@@ -390,8 +392,8 @@ void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,
 {
   //write code for forward movement
 
-  double speed1_output=(int)thruster1_ratio*(teleop_velocity.forward);
-  double speed2_output=(int)thruster2_ratio*(teleop_velocity.forward);
+  double speed1_output=(int)(thruster1_ratio*(teleop_velocity.forward));
+  double speed2_output=(int)(thruster2_ratio*(teleop_velocity.forward));
   
 if(speed1_output>SEABOTIX_LIMIT)
     thrusterSpeed.speed1=SEABOTIX_LIMIT;
@@ -475,7 +477,7 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 	if(teleop.tune){
 	  ROS_INFO("Tuner Enabled");
 
-	ctrl.depth_input=config.depth_input;
+//	ctrl.depth_input=config.depth_input;
 
 	thruster1_ratio=config.thruster1_ratio;
 	thruster2_ratio=config.thruster2_ratio;

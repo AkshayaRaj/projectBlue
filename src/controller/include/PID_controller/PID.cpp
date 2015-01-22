@@ -89,7 +89,7 @@ namespace srmauv{
 		_proportional=Kp*(setpoint-input);
 
 		//the following is setpoint weighting and bandwidth limitation for derivative:
-		//_derivative=(Td/(Td+N*dt))*(_derivative-Kp*N*(input-inputOld));
+//		_derivative=(Td/(Td+N*dt))*(_derivative-Kp*N*(input-inputOld));
 		_derivative=0;
 			
 		_total=_proportional+_derivative+_integral;
@@ -101,7 +101,7 @@ namespace srmauv{
 		
 		//Integral with wind-up protection: 
 		if(Ti)
-		 // _integral+=(Kp*dt*(setpoint-input))/Ti+ (output-_total)*dt/Tt ;
+//		  _integral+=(Kp*dt*(setpoint-input))/Ti+ (output-_total)*dt/Tt ;
 		  _integral+=Ti*(setpoint-input);
 		else
 				_integral=0; //incase Ti is reconfgured

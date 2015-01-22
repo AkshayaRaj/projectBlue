@@ -1,8 +1,8 @@
 #define TH1 4
 #define TH2 3
 #define TH3 8
-#define TH4 9
-#define TH5 7
+#define TH4 7
+#define TH5 9
 #define TH6 6
 #define TH7 2
 #define TH8 5
@@ -16,11 +16,10 @@
 #define TH7_F 22
 #define TH7_R 25
 
-#define TH8_F 34
+#define TH8_F 35
 #define TH8_R 37
 
-#define TORPEDO 42
-#define DROPPER 43
+
 
 #define RELAY1 38
 #define RELAY2 39

@@ -28,7 +28,7 @@ std_msgs::Bool emergency;
 
 void collectThruster(const srmauv_msgs::thruster &msg);
 
-ros::Publisher depth_pub("/depth",&depth);
+ros::Publisher depth_pub("/pressure_data",&depth);
 ros::Publisher emergency_pub("/emergency",&emergency);
 ros::Subscriber<srmauv_msgs::thruster>thruster_sub("/thruster_speed",collectThruster);
 
@@ -42,10 +42,10 @@ void setup(){
   s6.attach(TH6);
   initThrusters();
   pinMode(LCD,OUTPUT);
-  digitalWrite(LCD,LOW);
+  digitalWrite(LCD,HIGH);
   nh.initNode();
   enableThrusters();
-  enableManipulators();
+ 
   initPressure();
   initTopics();
   time_elapsed=0;
@@ -89,15 +89,7 @@ void loop(){
   
 }
 
-void enableManipulators(){
-  pinMode(TORPEDO,OUTPUT);
-  pinMode(DROPPER,OUTPUT);
-  digitalWrite(TORPEDO,LOW);
-  digitalWrite(DROPPER,LOW);
-  delay(1000);
-  digitalWrite(TORPEDO,HIGH);
-  digitalWrite(DROPPER,HIGH);
-}
+
 
 void initThrusters(){
  
@@ -180,11 +172,11 @@ void runThrusters(){
     digitalWrite(TH7_F,HIGH);  
     digitalWrite(TH7_R,LOW);
   }
-  if(thruster.speed8<0){
+  if(thruster.speed8>0){
     digitalWrite(TH8_F,LOW);  
     digitalWrite(TH8_R,HIGH);
   }
-  else if(thruster.speed8>0){
+  else if(thruster.speed8<0){
     digitalWrite(TH8_F,HIGH);  
     digitalWrite(TH8_R,LOW);
   }  
@@ -201,7 +193,7 @@ void runThrusters(){
   
 }
 void initPressure(){
-  pressure=analogRead(PRESSURE_1);
+  pressure=analogRead(PRESSURE_2);
   delay(1000);
 }
 
