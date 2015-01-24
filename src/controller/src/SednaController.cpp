@@ -434,13 +434,13 @@ if(speed1_output>SEABOTIX_LIMIT)
 	
 
 #ifndef REVERSE
-  double speed7_output=1*(-(double)limitSeabotix(headingPID_output)-(sidemovePID_output)-teleop_velocity.sidemove);
-  double speed8_output=1*((double)limitSeabotix(headingPID_output)-(sidemovePID_output)-teleop_velocity.sidemove);
+  double speed7_output=1*(-(double)limitSeabotix(headingPID_output)-(sidemovePID_output)+teleop_velocity.sidemove);
+  double speed8_output=1*((double)limitSeabotix(headingPID_output)-(sidemovePID_output)+teleop_velocity.sidemove);
 #endif
 
 #ifdef REVERSE
-  double speed7_output=1*((double)limitSeabotix(headingPID_output)-(sidemovePID_output)-teleop_velocity.sidemove);
-  double speed8_output=1*(-(double)limitSeabotix(headingPID_output)-(sidemovePID_output)-teleop_velocity.sidemove);
+  double speed7_output=1*((double)limitSeabotix(headingPID_output)-(sidemovePID_output)+teleop_velocity.sidemove);
+  double speed8_output=1*(-(double)limitSeabotix(headingPID_output)-(sidemovePID_output)+teleop_velocity.sidemove);
 #endif
 
 if(speed7_output<0)
@@ -517,7 +517,7 @@ void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double
 void callback(controller::controllerConfig &config, uint32_t level) {
 	ROS_INFO("Reconfigure Request");
 
-	if(teleop.tune){
+//	if(teleop.tune){
 	  ROS_INFO("Tuner Enabled");
 
 //	ctrl.depth_input=config.depth_input;
@@ -580,7 +580,7 @@ void callback(controller::controllerConfig &config, uint32_t level) {
      //   forwardPID.setKp(config.forward_Kp);
      //   forwardPID.setTd(config.forward_Td);
      //   forwardPID.setTi(config.forward_Ti);
-	}
+//	}
 
 }
 
