@@ -81,10 +81,10 @@ namespace srmauv{
 		double output;
 		double dt=nowTime.nsec-oldTime.nsec;
 
-		double Tt=sqrt(Ti*Td);
+		//double Tt=sqrt(Ti*Td);
 
-		oldTime.nsec>nowTime.nsec ? dt=(nowTime.nsec+1000000000-oldTime.nsec)/1000000 :
-					dt=nowTime.nsec/1000000;
+		//oldTime.nsec>nowTime.nsec ? dt=(nowTime.nsec+1000000000-oldTime.nsec)/1000000 :
+		//			dt=nowTime.nsec/1000000;
 
 		_proportional=Kp*(setpoint-input);
 
@@ -92,7 +92,7 @@ namespace srmauv{
 //		_derivative=(Td/(Td+N*dt))*(_derivative-Kp*N*(input-inputOld));
 		_derivative=0;
 			
-		_total=_proportional+_derivative+_integral;
+		_total=_proportional+_integral;
 
 		//apply constrains to output: 
 		output=actuatorConstrain(_total);
@@ -100,9 +100,10 @@ namespace srmauv{
 
 		
 		//Integral with wind-up protection: 
-		if(Ti)
+		if(Ti!=0){
 //		  _integral+=(Kp*dt*(setpoint-input))/Ti+ (output-_total)*dt/Tt ;
-		  _integral+=Ti*(setpoint-input);
+		  _integral+=(Kp*(setpoint-input))/Ti;
+}
 		else
 				_integral=0; //incase Ti is reconfgured
 		if (_integral>actMax)

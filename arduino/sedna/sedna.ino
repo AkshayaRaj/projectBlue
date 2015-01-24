@@ -193,7 +193,7 @@ void runThrusters(){
   
 }
 void initPressure(){
-  pressure=analogRead(PRESSURE_2);
+  pressure=analogRead(PRESSURE_1);
   delay(1000);
 }
 

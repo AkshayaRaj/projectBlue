@@ -47,6 +47,7 @@ int main(int argc,char** argv){
 
   teleop.enable=false;
   teleop.tune=false;
+teleop.depth_enable=false;
 
   keyDown_sub=nh.subscribe("/keyboard/keydown",1000,keyDown);
   keyUp_sub=nh.subscribe("/keyboard/keyup",1000,keyUp);
@@ -100,9 +101,7 @@ void setCurrent(){
 }
 
 void setTeleop(const srmauv_msgs::teleop_sedna::ConstPtr& msg){
-  teleop.heading_setpoint=msg->heading_setpoint;
-  teleop.depth_setpoint=msg->depth_setpoint;
-  teleop.enable=true;
+  teleop=*msg;
 }
 
 void keyDown(const keyboard::KeyConstPtr & key){
@@ -112,6 +111,7 @@ void keyDown(const keyboard::KeyConstPtr & key){
     setCurrent();
 
   }
+
 
   if(teleop.enable){
    if(key->code==key->KEY_u){ //update setpoints to current input
@@ -129,6 +129,10 @@ void keyDown(const keyboard::KeyConstPtr & key){
     teleop.heading_setpoint=yaw;
 
   }
+
+else if(key->code==100){ //d key for depth enable disable
+	teleop.depth_enable=!teleop.depth_enable;
+}
 
 
   else if(key->code==key->KEY_EQUALS){
@@ -164,7 +168,7 @@ void keyDown(const keyboard::KeyConstPtr & key){
 
   else if(key->code==key->KEY_UP){
     if(teleop.enable){
-    int forward_vel=100;
+    int forward_vel=150;
    //nh->param("/controller/teleop_forward_velocity",forward_vel,100);
    teleop.forward_speed=forward_vel;
     }
@@ -175,7 +179,7 @@ void keyDown(const keyboard::KeyConstPtr & key){
   }
   else if(key->code==key->KEY_DOWN){
     if(teleop.enable){
-        int forward_vel=100;
+        int forward_vel=150;
     //   nh.param("/controller/teleop_reverse_velocity",forward_vel,100);
        teleop.forward_speed=-forward_vel;
         }
@@ -186,7 +190,7 @@ void keyDown(const keyboard::KeyConstPtr & key){
 
   else if(key->code==key->KEY_LEFT){
     if(teleop.enable){
-        int side_vel=100;
+        int side_vel=150;
     //   nh.param("/controller/teleop_sidemove_velocity",side_vel,100);
        teleop.sidemove_speed=side_vel;
         }
@@ -197,7 +201,7 @@ void keyDown(const keyboard::KeyConstPtr & key){
 
   else if(key->code==key->KEY_RIGHT){
     if(teleop.enable){
-        int side_vel=100;
+        int side_vel=150;
    //    nh.param("/controller/teleop_sidemove_velocity",side_vel,100);
        teleop.sidemove_speed=-side_vel;
         }
@@ -208,13 +212,13 @@ void keyDown(const keyboard::KeyConstPtr & key){
 
   if(teleop.depth_setpoint<0)
     teleop.depth_setpoint=0;
-  else if(teleop.depth_setpoint>500)
-    teleop.depth_setpoint=500;
+  else if(teleop.depth_setpoint>800)
+    teleop.depth_setpoint=800;
 
   }
 
   if(teleop.heading_setpoint<-179)
-    teleop.heading_setpoint=179;
+    teleop.heading_setpoint=-179;
   if(teleop.heading_setpoint>179)
     teleop.heading_setpoint=179;
 

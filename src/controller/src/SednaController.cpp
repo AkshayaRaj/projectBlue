@@ -68,7 +68,7 @@ srmauv_msgs::pid_info pidInfo;
 nav_msgs::Odometry odomData;
 std_msgs::Int8 current__mode;
 srmauv_msgs::teleop_sedna teleop;
-
+teleop.depth_enable=false;
 double depth_offset = 0;
 
 struct teleop_speed{
@@ -405,8 +405,8 @@ void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,
 	double speed2_output;
 
   if(teleop_velocity.forward<0){
-	 speed1_output=(int)thruster1_rev_ratio*teleop_velocity.forward;
-	 speed2_output=(int)thruster2_rev_ratio*teleop_velocity.forward;
+	 speed1_output=(int)(thruster1_rev_ratio*teleop_velocity.forward);
+	 speed2_output=(int)(thruster2_rev_ratio*teleop_velocity.forward);
 
 }
 	else{
@@ -445,20 +445,20 @@ if(speed1_output>SEABOTIX_LIMIT)
 
 if(speed7_output<0)
 {
-speed7_output=(int)thruster7_rev_ratio*teleop_velocity.forward;
+speed7_output=(int)(thruster7_rev_ratio*teleop_velocity.sidemove);
 }
 else
 {
-speed7_output=(int)thruster7_ratio*teleop_velocity.forward;
+speed7_output=(int)(thruster7_ratio*teleop_velocity.sidemove);
 }
 
 if(speed8_output<0)
 {
-speed8_output=(int)thruster8_rev_ratio*teleop_velocity.forward;
+speed8_output=(int)(thruster8_rev_ratio*teleop_velocity.sidemove);
 }
 else
 {
-speed8_output=(int)thruster8_ratio*teleop_velocity.forward;    
+speed8_output=(int)(thruster8_ratio*teleop_velocity.sidemove);    
 }
 	
 
@@ -484,6 +484,9 @@ speed8_output=(int)thruster8_ratio*teleop_velocity.forward;
 
 void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output)
 {
+
+	if(teleop.depth_enable==false)
+		depthPID_output=0;
   double speed3_output = thruster3_ratio*(- depthPID_output + pitchPID_output - rollPID_output);
   double speed4_output = thruster4_ratio*(- depthPID_output + pitchPID_output + rollPID_output);
   double speed5_output = thruster5_ratio*(- depthPID_output - pitchPID_output + rollPID_output);
@@ -587,6 +590,7 @@ void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
  teleop_velocity.sidemove=msg->sidemove_speed;
  teleop_velocity.forward=msg->forward_speed;
  teleop.tune=msg->tune;
+	teleop.depth_enable=msg->depth_enable;
  if(!teleop.tune){
    ctrl.depth_setpoint=msg->depth_setpoint;
    ctrl.heading_setpoint=msg->heading_setpoint;

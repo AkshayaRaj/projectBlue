@@ -2,6 +2,7 @@ bool enable
 bool tune
 bool torpedo
 bool dropper 
+bool depth_enable
 
 int16 forward_speed
 int16 sidemove_speed

@@ -63,7 +63,7 @@ void loop(){
 
 void initLights(){
    strip.begin();
-  strip.show(); // Initialize all pixels to 'off'
+  //strip.show(); // Initialize all pixels to 'off'
   //  colorWipeFull(strip.Color(0, 255, 0), 50); // Green
   blink(0,255,0,2);
   
