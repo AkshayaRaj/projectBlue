@@ -190,7 +190,7 @@ else if(key->code==100){ //d key for depth enable disable
 
   else if(key->code==key->KEY_LEFT){
     if(teleop.enable){
-        int side_vel=150;
+        int side_vel=120;
     //   nh.param("/controller/teleop_sidemove_velocity",side_vel,100);
        teleop.sidemove_speed=side_vel;
         }
@@ -201,7 +201,7 @@ else if(key->code==100){ //d key for depth enable disable
 
   else if(key->code==key->KEY_RIGHT){
     if(teleop.enable){
-        int side_vel=150;
+        int side_vel=120;
    //    nh.param("/controller/teleop_sidemove_velocity",side_vel,100);
        teleop.sidemove_speed=-side_vel;
         }
