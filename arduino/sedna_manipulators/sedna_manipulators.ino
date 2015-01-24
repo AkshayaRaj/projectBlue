@@ -49,8 +49,8 @@ void setup(){
 
 void loop(){
        // currentTime=millis();
-    //     if(currentTime>=(slow_loop+333)){
-        colorWipeFull(strip.Color(0, 40, 0), 50); 
+     //   if(currentTime>=(slow_loop+333)){
+    //    colorWipeFull(strip.Color(0, 40, 0), 50); 
        
         nh.spinOnce();
       

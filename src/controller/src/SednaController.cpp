@@ -68,7 +68,7 @@ srmauv_msgs::pid_info pidInfo;
 nav_msgs::Odometry odomData;
 std_msgs::Int8 current__mode;
 srmauv_msgs::teleop_sedna teleop;
-teleop.depth_enable=false;
+//teleop.depth_enable=false;
 double depth_offset = 0;
 
 struct teleop_speed{
@@ -221,7 +221,7 @@ int main (int argc,char **argv){
 	ros::NodeHandle nh;
 	
 	teleop.tune=true;
-
+	teleop.depth_enable=false;
 
 	thrusterPub=nh.advertise<srmauv_msgs::thruster>("/thruster_speed",1000);
 	//depthPub=nh.advertise<srmauv_msgs::depth>("/depth",1000);
@@ -434,31 +434,31 @@ if(speed1_output>SEABOTIX_LIMIT)
 	
 
 #ifndef REVERSE
-  double speed7_output=1*(-(double)limitSeabotix(headingPID_output)-(sidemovePID_output)+teleop_velocity.sidemove);
-  double speed8_output=1*((double)limitSeabotix(headingPID_output)-(sidemovePID_output)+teleop_velocity.sidemove);
+  double speed7_output=(-headingPID_output+teleop_velocity.sidemove);
+  double speed8_output=(headingPID_output+teleop_velocity.sidemove);
 #endif
 
 #ifdef REVERSE
-  double speed7_output=1*((double)limitSeabotix(headingPID_output)-(sidemovePID_output)+teleop_velocity.sidemove);
-  double speed8_output=1*(-(double)limitSeabotix(headingPID_output)-(sidemovePID_output)+teleop_velocity.sidemove);
+  double speed7_output=(headingPID_output+teleop_velocity.sidemove);
+  double speed8_output=(-headingPID_output+teleop_velocity.sidemove);
 #endif
 
 if(speed7_output<0)
 {
-speed7_output=(int)(thruster7_rev_ratio*teleop_velocity.sidemove);
+speed7_output=(int)(thruster7_rev_ratio*speed7_output);
 }
 else
 {
-speed7_output=(int)(thruster7_ratio*teleop_velocity.sidemove);
+speed7_output=(int)(thruster7_ratio*speed7_output);
 }
 
 if(speed8_output<0)
 {
-speed8_output=(int)(thruster8_rev_ratio*teleop_velocity.sidemove);
+speed8_output=(int)(thruster8_rev_ratio*speed8_output);
 }
 else
 {
-speed8_output=(int)(thruster8_ratio*teleop_velocity.sidemove);    
+speed8_output=(int)(thruster8_ratio*speed8_output);    
 }
 	
 
