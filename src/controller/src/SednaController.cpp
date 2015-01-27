@@ -222,7 +222,7 @@ int main (int argc,char **argv){
 	
 	teleop.tune=true;
 	teleop.depth_enable=false;
-
+	ctrl.heading_setpoint=20;
 	thrusterPub=nh.advertise<srmauv_msgs::thruster>("/thruster_speed",1000);
 	//depthPub=nh.advertise<srmauv_msgs::depth>("/depth",1000);
 	controllerPub=nh.advertise<srmauv_msgs::controller>("/controller_targets",100);   // verified with tuining_ui
@@ -383,7 +383,7 @@ int limitSeabotix(int speed){
   return speed;
 */
 
-  int out=(int)fmap(speed,(int)headingPID.getActmin(),(int)headingPID.getActmax(),-255,255);
+  int out=(int)fmap(speed,0,255,24,255);
   return out;
 
 }
@@ -430,8 +430,27 @@ if(speed1_output>SEABOTIX_LIMIT)
   else
     thrusterSpeed.speed2=speed2_output;
 
+bool neg;
+double toFmap;
+if(headingPID_output<0)	
+	neg=true;
 
-	
+if(neg){
+	toFmap=-headingPID_output;
+}
+else{
+	toFmap=headingPID_output;
+}
+
+toFmap=limitSeabotix(toFmap);
+
+if(neg){
+	headingPID_output=-toFmap;
+}
+
+else{
+	headingPID_output=toFmap;
+}
 
 #ifndef REVERSE
   double speed7_output=(-headingPID_output+teleop_velocity.sidemove);
@@ -553,7 +572,7 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 	inHovermode=config.hovermode;
 
 	ctrl.depth_setpoint=config.depth_setpoint;
-	ctrl.heading_setpoint=config.heading_setpoint;
+//	ctrl.heading_setpoint=config.heading_setpoint;
 	ctrl.roll_setpoint=config.roll_setpoint;
 	ctrl.pitch_setpoint=config.pitch_setpoint;
 
@@ -590,10 +609,11 @@ void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
  teleop_velocity.sidemove=msg->sidemove_speed;
  teleop_velocity.forward=msg->forward_speed;
  teleop.tune=msg->tune;
+
 	teleop.depth_enable=msg->depth_enable;
  if(!teleop.tune){
    ctrl.depth_setpoint=msg->depth_setpoint;
-   ctrl.heading_setpoint=msg->heading_setpoint;
+//   ctrl.heading_setpoint=msg->heading_setpoint;
  }
 
 }
