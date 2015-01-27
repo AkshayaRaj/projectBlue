@@ -222,7 +222,7 @@ int main (int argc,char **argv){
 	
 	teleop.tune=true;
 	teleop.depth_enable=false;
-	ctrl.heading_setpoint=20;
+//	ctrl.heading_setpoint=20;
 	thrusterPub=nh.advertise<srmauv_msgs::thruster>("/thruster_speed",1000);
 	//depthPub=nh.advertise<srmauv_msgs::depth>("/depth",1000);
 	controllerPub=nh.advertise<srmauv_msgs::controller>("/controller_targets",100);   // verified with tuining_ui
@@ -539,7 +539,7 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 //	if(teleop.tune){
 	  ROS_INFO("Tuner Enabled");
 
-//	ctrl.depth_input=config.depth_input;
+	ctrl.depth_input=config.depth_input;
 
 	thruster1_ratio=config.thruster1_ratio;
 	thruster2_ratio=config.thruster2_ratio;
@@ -572,7 +572,7 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 	inHovermode=config.hovermode;
 
 	ctrl.depth_setpoint=config.depth_setpoint;
-//	ctrl.heading_setpoint=config.heading_setpoint;
+	ctrl.heading_setpoint=config.heading_setpoint;
 	ctrl.roll_setpoint=config.roll_setpoint;
 	ctrl.pitch_setpoint=config.pitch_setpoint;
 
@@ -613,7 +613,7 @@ void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
 	teleop.depth_enable=msg->depth_enable;
  if(!teleop.tune){
    ctrl.depth_setpoint=msg->depth_setpoint;
-//   ctrl.heading_setpoint=msg->heading_setpoint;
+   ctrl.heading_setpoint=msg->heading_setpoint;
  }
 
 }
