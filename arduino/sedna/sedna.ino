@@ -42,7 +42,7 @@ void setup(){
   s6.attach(TH6);
   initThrusters();
   pinMode(LCD,OUTPUT);
-  digitalWrite(LCD,HIGH);
+  digitalWrite(LCD,LOW);
   nh.initNode();
   enableThrusters();
  

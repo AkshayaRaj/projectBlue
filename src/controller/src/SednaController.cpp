@@ -304,6 +304,21 @@ int main (int argc,char **argv){
 			headingPID.clearIntegrator();
 		}
 
+		if(inPitchPID){
+			pitch_output=pitchPID.computePID((double)ctrl.pitch_setpoint,ctrl.pitch_input);
+			 pidInfo.pitch.p=depthPID.getProportional();
+                        pidInfo.pitch.i=pitchPID.getIntegral();
+                        pidInfo.pitch.d=pitchPID.getIntegral();
+                        pidInfo.pitch.total=pitch_output;
+
+
+
+		}
+		else{
+			pitch_output=0;
+			pitchPID.clearIntegrator();
+		}
+
 		setHorizontalThrustSpeed(heading_output,forward_output,sidemove_output);
 		setVerticalThrustSpeed(depth_output,pitch_output,roll_ouput);
 
