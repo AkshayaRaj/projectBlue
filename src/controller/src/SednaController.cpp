@@ -5,6 +5,7 @@
 #define SAFETY_RANGE 400
 #define SEABOTIX_LIMIT 255
 
+#include <math.h>;
 #include "PID.h"
 #include <ros/ros.h>
 #include <tf/tf.h>
@@ -228,7 +229,7 @@ int main (int argc,char **argv){
 	controllerPub=nh.advertise<srmauv_msgs::controller>("/controller_targets",100);   // verified with tuining_ui
 	locomotionModePub=nh.advertise<std_msgs::Int8>("/locomotion_mode",100,true);
 	pid_infoPub=nh.advertise<srmauv_msgs::pid_info>("/pid_info",1000);   // verified with tuining_ui
-	  headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
+	//  headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
 
 	//subscribers: 
 
@@ -281,9 +282,9 @@ int main (int argc,char **argv){
 			depth_output=depthPID.computePID((double)ctrl.depth_setpoint,ctrl.depth_input)*-1;
 			pidInfo.depth.p=depthPID.getProportional();
 			pidInfo.depth.i=depthPID.getIntegral();
-			pidInfo.depth.d=depthPID.getIntegral();
+			pidInfo.depth.d=depthPID.getDerivative();
 			pidInfo.depth.total=depth_output;
-			ROS_INFO("P: %d\tI:%d\tD:%d\t total: %d\n",depthPID.getProportional(),depthPID.getIntegral(),depthPID.getDerivative(),depthPID.getTotal());
+			//ROS_INFO("P: %d\tI:%d\tD:%d\t total: %d\n",depthPID.getProportional(),depthPID.getIntegral(),depthPID.getDerivative(),depthPID.getTotal());
 			
 		}
 		else{
@@ -295,7 +296,7 @@ int main (int argc,char **argv){
 				heading_output=getHeadingPIDUpdate();
 				pidInfo.heading.p=headingPID.getProportional();
 				pidInfo.heading.i=headingPID.getIntegral();
-				pidInfo.heading.d=headingPID.getIntegral();
+				pidInfo.heading.d=headingPID.getDerivative();
 				pidInfo.heading.total=headingPID.getTotal();
 
 		}
@@ -308,7 +309,7 @@ int main (int argc,char **argv){
 			pitch_output=pitchPID.computePID((double)ctrl.pitch_setpoint,ctrl.pitch_input);
 			 pidInfo.pitch.p=depthPID.getProportional();
                         pidInfo.pitch.i=pitchPID.getIntegral();
-                        pidInfo.pitch.d=pitchPID.getIntegral();
+                        pidInfo.pitch.d=pitchPID.getDerivative();
                         pidInfo.pitch.total=pitch_output;
 
 
@@ -376,10 +377,18 @@ void getOrientation(const sensor_msgs::Imu::ConstPtr& msg){
         tf::Matrix3x3(q).getEulerZYX(yaw,pitch,roll);
       //  tf::Matrix3x3(q).
 	//ctrl.heading_input=yaw;
+
+          pitch=pitch/M_PI*180;
+          roll=roll/M_PI*180;
+          yaw=yaw/M_PI*180;
+
 	ctrl.pitch_input=pitch;
 	ctrl.roll_input=roll;
+	ctrl.heading_input=yaw;
+
 	//int x=5;
 	//ROS_INFO("%f\t%f\t%f\t",yaw,pitch,roll);
+
 
 
 }
