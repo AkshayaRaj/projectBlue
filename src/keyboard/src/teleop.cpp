@@ -68,8 +68,8 @@ teleop.depth_enable=false;
     setCurrent();
     }
 
-    ROS_INFO("Teleop: %d\tDepth: %d\tHeading: %f\tForward: %d\tReverse: %d\tStrafe: %d",
-             teleop.enable,teleop.depth_setpoint,teleop.heading_setpoint,teleop.forward_speed,teleop.reverse_speed,teleop.sidemove_speed);
+  //  ROS_INFO("Teleop: %d\tDepth: %d\tHeading: %f\tForward: %d\tReverse: %d\tStrafe: %d",
+   //          teleop.enable,teleop.depth_setpoint,teleop.heading_setpoint,teleop.forward_speed,teleop.reverse_speed,teleop.sidemove_speed);
     teleopPub.publish(teleop);
 
     ros::spinOnce();
@@ -108,6 +108,7 @@ void keyDown(const keyboard::KeyConstPtr & key){
  // ROS_INFO("%d pressed",key->code);
   if(key->code==key->KEY_t){
     teleop.enable=!teleop.enable;
+    ROS_INFO("Teleop :%d",teleop.enable);
     setCurrent();
 
   }
@@ -126,7 +127,7 @@ void keyDown(const keyboard::KeyConstPtr & key){
     teleop.depth_setpoint--;
     else
       teleop.depth_setpoint=depth.depth;
-    teleop.heading_setpoint=yaw;
+    ROS_INFO("Depth SP: %d",teleop.depth_setpoint);
 
   }
 
@@ -141,9 +142,12 @@ else if(key->code==100){ //d key for depth enable disable
     else
       teleop.depth_setpoint=depth.depth;
 
+    ROS_INFO("Depth SP: %d",teleop.depth_setpoint);
+
   }
   else if(key->code==key->KEY_PAGEUP){
     teleop.torpedo=true;
+    ROS_INFO("Dropper fired !");
   }
   else if(key->code==key->KEY_PAGEDOWN){
     teleop.dropper=true;
@@ -154,12 +158,16 @@ else if(key->code==100){ //d key for depth enable disable
       teleop.heading_setpoint--;
     else
       teleop.heading_setpoint=yaw;
+
+    ROS_INFO("Heading SP: %d",teleop.heading_setpoint);
   }
   else if(key->code==key->KEY_RIGHTBRACKET){
     if(teleop.enable)
       teleop.heading_setpoint++;
     else
       teleop.heading_setpoint=yaw;
+
+    ROS_INFO("Heading SP: %d",teleop.heading_setpoint);
   }
 
   else if(key->code==96){ //tune toggle
@@ -210,7 +218,7 @@ else if(key->code==100){ //d key for depth enable disable
         }
   }
 
-  if(teleop.depth_setpoint<0)
+  if(teleop.depth_setpoint<=0)
     teleop.depth_setpoint=0;
   else if(teleop.depth_setpoint>800)
     teleop.depth_setpoint=800;
