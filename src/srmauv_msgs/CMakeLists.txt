@@ -60,7 +60,7 @@ geometry_msgs
 	thruster.msg
 	vision.msg
 	teleop_sedna.msg
-
+	line.msg
  )
 
 ## Generate services in the 'srv' folder

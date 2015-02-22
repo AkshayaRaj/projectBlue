@@ -5,7 +5,7 @@
 #define SAFETY_RANGE 400
 #define SEABOTIX_LIMIT 255
 
-#include <math.h>;
+#include <math.h>
 #include "PID.h"
 #include <ros/ros.h>
 #include <tf/tf.h>
