@@ -216,9 +216,11 @@ bool controller_srv_handler(srmauv_msgs::set_controller::Request &req,
 
 int main (int argc,char **argv){
 	ros::init(argc,argv,"controller");
-	double forward_output,pitch_output,roll_ouput,heading_output,sidemove_output,depth_output;
+	double forward_output,pitch_output,roll_output,heading_output,sidemove_output,depth_output;
 	double forward_vel_output,sidemove_vel_output;
 
+
+	//ROS_INFO("inDepth? :%d" , inDepthPID);
 	ros::NodeHandle nh;
 	
 	teleop.tune=true;
@@ -262,6 +264,7 @@ int main (int argc,char **argv){
 	std_mode.data=0;
 	locomotionModePub.publish(std_mode);	
 	ROS_INFO("PID controllers are ready lets roll.. !");
+	ROS_INFO("inDepth? :%d" , inDepthPID);
 	
 	while(ros::ok())
 	{
@@ -308,18 +311,31 @@ int main (int argc,char **argv){
 
 		if(inPitchPID){
 			pitch_output=pitchPID.computePID((double)ctrl.pitch_setpoint,ctrl.pitch_input);
-			 pidInfo.pitch.p=depthPID.getProportional();
+			 pidInfo.pitch.p=pitchPID.getProportional();
                         pidInfo.pitch.i=pitchPID.getIntegral();
                         pidInfo.pitch.d=pitchPID.getDerivative();
                         pidInfo.pitch.total=pitch_output;
 		}
 		else{
+		  pitch_output=0;
+		  pitchPID.clearIntegrator();
 		}
-			pitch_output=0;
-			pitchPID.clearIntegrator();
+
+		if(inRollPID){
+		                        roll_output=rollPID.computePID((double)ctrl.roll_setpoint,ctrl.roll_input);
+		                         pidInfo.roll.p=rollPID.getProportional();
+		                        pidInfo.roll.i=rollPID.getIntegral();
+		                        pidInfo.roll.d=rollPID.getDerivative();
+		                        pidInfo.roll.total=roll_output;
+		                }
+		                else{
+		                  roll_output=0;
+		                  rollPID.clearIntegrator();
+		                }
+
 
 		setHorizontalThrustSpeed(heading_output,forward_output,sidemove_output);
-		setVerticalThrustSpeed(depth_output,pitch_output,roll_ouput);
+		setVerticalThrustSpeed(depth_output,pitch_output,roll_output);
 
 		controllerPub.publish(ctrl);
 		pid_infoPub.publish(pidInfo);

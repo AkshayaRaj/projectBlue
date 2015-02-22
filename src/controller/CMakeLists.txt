@@ -129,8 +129,8 @@ target_link_libraries(pid_client
   ${catkin_LIBRARIES}
 )
 
-add_executable(bag src/readBag.cpp)
- target_link_libraries(bag  ${catkin_LIBRARIES})
+#add_executable(bag src/readBag.cpp)
+# target_link_libraries(bag  ${catkin_LIBRARIES})
 
 add_dependencies(pid_client $(controller_EXPORTED_TARGETS))
 
