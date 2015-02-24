@@ -61,6 +61,7 @@ geometry_msgs
 	vision.msg
 	teleop_sedna.msg
 	line.msg
+	goal.msg
  )
 
 ## Generate services in the 'srv' folder

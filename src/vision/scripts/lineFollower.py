@@ -161,7 +161,7 @@ class Line:
         self.highThresh[2]=config['hiV']
         self.minContourArea=config['minContourArea']
         self.blur=config['blur']
-        print "configured"
+        #print "configured"
         return config
 
     def circles(self,cv_image):
@@ -236,10 +236,10 @@ class Line:
         #cv2.imshow(mask2)
 
         mask_out=cv2.cvtColor(mask1,cv2.COLOR_GRAY2BGR)
-	#mask_out1=cv2.cvtColor(mas1,cv2.COLOR_GRAY2BGR)
+	mask_out1=cv2.cvtColor(mas1,cv2.COLOR_GRAY2BGR)
         try:
 
-            self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(mas1,encoding="bgr8"))
+            self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(mask_out1,encoding="bgr8"))
 
 	    self.threshOut_pub.publish(self.bridge.cv2_to_imgmsg(mask_out,encoding="bgr8"))
         except CvBridgeError as e:
@@ -276,11 +276,12 @@ class Line:
 
             box = cv2.cv.BoxPoints(rect)
             box = np.int0(box)
-            print "points",box[0]
+           # print "points",box[0]
             #cv2.drawContours(img,[box],0,(0,0,255),2)
             maxArea = 0
             for contour in contours:
                 area = cv2.contourArea(contour)
+		print "contour area",area
                 if area > 10:
                     #Find the center using moments
                     mu = cv2.moments(contour, False)
@@ -298,11 +299,11 @@ class Line:
                 #Find the blackline heading
                 edge1 = points[1] - points[0]
                 edge2 = points[2] - points[1]
-
+		'''
                 print "points1",points[1]
                 print "points0",points[0]
                 print "edge1",edge1
-
+		'''
 
                 #Choose the vertical edge
                 if cv2.norm(edge1) > cv2.norm(edge2):

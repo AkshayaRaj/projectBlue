@@ -397,6 +397,7 @@ void updateStatus() {
 	controlUI->ui.i_val->setText(QString::number(controlUI->i));
 	controlUI->ui.d_val->setText(QString::number(controlUI->d));
 	controlUI->ui.total_val->setText(QString::number(controlUI->total));
+
 }
 
 void updateGraph() {
