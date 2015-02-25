@@ -5,6 +5,8 @@
 #define SAFETY_RANGE 400
 #define SEABOTIX_LIMIT 255
 
+
+#include <math.h>
 #include "PID.h"
 #include <ros/ros.h>
 #include <tf/tf.h>
@@ -376,12 +378,12 @@ void getOrientation(const sensor_msgs::Imu::ConstPtr& msg){
         tf::Matrix3x3(q).getEulerZYX(yaw,pitch,roll);
       //  tf::Matrix3x3(q).
 	//ctrl.heading_input=yaw;
-	ctrl.pitch_input=pitch;
-	ctrl.roll_input=roll;
+	ctrl.pitch_input=pitch/M_PI*180;
+	ctrl.roll_input=roll/M_PI*180;
 	//int x=5;
 	//ROS_INFO("%f\t%f\t%f\t",yaw,pitch,roll);
 
-
+g
 }
 
 void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg){
@@ -398,6 +400,8 @@ int limitSeabotix(int speed){
   return speed;
 */
 
+  if speed==0
+      return 0;
   int out=(int)fmap(speed,0,255,24,255);
   return out;
 
@@ -406,6 +410,7 @@ int limitSeabotix(int speed){
 
 
 double fmap(int input, int in_min, int in_max, int out_min, int out_max){
+
   return (input- in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
