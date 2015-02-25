@@ -18,7 +18,7 @@ generate_dynamic_reconfigure_options(
 	cfg/buoy.cfg
 	cfg/Tutorials.cfg
 	cfg/dropper.cfg
-	
+	cfg/line.cfg	
 )
 
 find_package(OpenCV)

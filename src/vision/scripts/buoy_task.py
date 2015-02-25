@@ -129,7 +129,7 @@ class Buoys:
 
         self.bridge=CvBridge()
 
-        self.camera_topic=rospy.get_param('~image', '/sedna/front/image_raw')
+        self.camera_topic=rospy.get_param('~image', '/sedna/bottom/image_raw')
 
         self.image_filter_pub=rospy.Publisher("/vision/image_filter",Image)
 
