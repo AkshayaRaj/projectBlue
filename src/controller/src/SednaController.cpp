@@ -383,7 +383,7 @@ void getOrientation(const sensor_msgs::Imu::ConstPtr& msg){
 	//int x=5;
 	//ROS_INFO("%f\t%f\t%f\t",yaw,pitch,roll);
 
-g
+
 }
 
 void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg){
@@ -400,7 +400,7 @@ int limitSeabotix(int speed){
   return speed;
 */
 
-  if speed==0
+  if( speed==0)
       return 0;
   int out=(int)fmap(speed,0,255,24,255);
   return out;
