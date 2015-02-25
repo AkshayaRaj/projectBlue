@@ -3,14 +3,17 @@
 #include<keyboard/Key.h>
 #include <dynamic_reconfigure/server.h>
 #include <srmauv_msgs/depth.h>
+#include <srmauv_msgs/goal.h>
 #include<sensor_msgs/Imu.h>
 #include <std_msgs/Int16.h>
 #include <tf/tf.h>
 #include <geometry_msgs/Pose2D.h>
+#include <srmauv_msgs/line.h>
 
 
 srmauv_msgs::teleop_sedna teleop;
 srmauv_msgs::depth depth;
+srmauv_msgs::line line;
 keyboard::Key key;
 
 int pressure;
@@ -23,6 +26,7 @@ ros::Subscriber imuSub;
 ros::Subscriber teleopSetter;
 ros::Subscriber headingSub;
 ros::Publisher teleopPub;
+ros::Subscriber lineSub;
 
 int limit(int val, int low,int high);
 void keyUp(const keyboard::KeyConstPtr& key);
@@ -30,14 +34,23 @@ void keyDown(const keyboard::KeyConstPtr& key);
 void getPressure(const srmauv_msgs::depth &msg);
 void getOrientation(const sensor_msgs::Imu::ConstPtr &msg);
 void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg);
-void setTeleop(const srmauv_msgs::teleop_sedna::ConstPtr& msg);
+void setGoal(const srmauv_msgs::goal::ConstPtr& msg);
+void getLine(const srmauv_msgs::line::ConstPtr& msg);
 void setCurrent();
+void runMission();
 bool in_depth=false;
 bool in_yaw=false;
 bool in_roll=false;
 bool in_pitch=false;
 
+
 bool shift=false;
+bool line_once=true;
+bool bucket_once=true;
+
+bool inLine=false;
+bool inBucket=false;
+bool inFlare=false;
 
 //ros::NodeHandle *nh;
 
@@ -47,6 +60,8 @@ int main(int argc,char** argv){
  ros::NodeHandle nh;
 
 
+
+ teleop.enable_pids=true;
   teleop.enable=false;
   teleop.tune=false;
 teleop.depth_enable=false;
@@ -55,8 +70,8 @@ teleop.depth_enable=false;
   keyUp_sub=nh.subscribe("/keyboard/keyup",1000,keyUp);
   pressureSub=nh.subscribe("/pressure_data",1000,getPressure);
   imuSub=nh.subscribe("/imu/data",1000,getOrientation);
-  headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
-  teleopSetter=nh.subscribe("/teleop_set",100,setTeleop);
+ // headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
+  teleopSetter=nh.subscribe("/teleop_set",100,setGoal);
 
   teleopPub=nh.advertise<srmauv_msgs::teleop_sedna>("/teleop_sedna",1000);
 
@@ -73,6 +88,9 @@ ROS_INFO("Use keyboard/ui_message  to dispatch teleop message to controller... "
 
   //  ROS_INFO("Teleop: %d\tDepth: %d\tHeading: %f\tForward: %d\tReverse: %d\tStrafe: %d",
    //          teleop.enable,teleop.depth_setpoint,teleop.heading_setpoint,teleop.forward_speed,teleop.reverse_speed,teleop.sidemove_speed);
+
+
+    void runMission();
     teleopPub.publish(teleop);
 
     ros::spinOnce();
@@ -81,9 +99,21 @@ ROS_INFO("Use keyboard/ui_message  to dispatch teleop message to controller... "
 
 	return 0;
 }
+
+void runMission(){
+
+if(inLine && line.possible){
+  teleop.heading_setpoint=yaw + line.heading;
+}
+
+}
 void getPressure(const srmauv_msgs::depth &msg){
   depth.depth=msg.depth;
 
+}
+
+void getLine(const srmauv_msgs::line::ConstPtr& msg){
+  line=*msg;
 }
 
 
@@ -101,7 +131,7 @@ void getOrientation(const sensor_msgs::Imu::ConstPtr &msg){
 }
 
 void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg){
-  yaw=msg->theta;
+  //yaw=msg->theta;
 }
 
 void setCurrent(){
@@ -112,8 +142,26 @@ void setCurrent(){
         teleop.reverse_speed=0;
 }
 
-void setTeleop(const srmauv_msgs::teleop_sedna::ConstPtr& msg){
-  teleop=*msg;
+void setGoal(const srmauv_msgs::goal::ConstPtr& msg){
+  ROS_INFO("Received new goal");
+  if(msg->goDepth){
+    teleop.depth_setpoint=limit(msg->depth,1,800);
+    ROS_INFO("DEPTH GOAL: %d",teleop.depth_setpoint);
+      }
+  if(msg->goHeading){
+     teleop.heading_setpoint=limit(msg->heading,-179,179);
+     ROS_INFO("HEADING GOAL: %d",teleop.heading_setpoint);
+       }
+  if(msg->goPitch){
+     teleop.pitch_setpoint=limit(msg->pitch,-60,60);
+     ROS_INFO("PITCH GOAL: %d",teleop.pitch_setpoint);
+       }
+  if(msg->goRoll){
+     teleop.roll_setpoint=limit(msg->roll,-179,179);
+     ROS_INFO("ROLL GOAL: %d",teleop.roll_setpoint);
+       }
+
+
 }
 
 void keyDown(const keyboard::KeyConstPtr & key){
@@ -124,7 +172,10 @@ void keyDown(const keyboard::KeyConstPtr & key){
     setCurrent();
 
   }
-
+  if(key->code==key->KEY_p){
+    teleop.enable_pids=!teleop.enable_pids;
+    ROS_INFO("PIDs ON :[%s]",teleop.enable_pids ? "True" : "False");
+  }
 
   if(teleop.enable){
    if(key->code==key->KEY_u){ //update setpoints to current input
@@ -214,6 +265,7 @@ else if(key->code==100){ //d key for depth enable disable
 
   else if(key->code==96){ //tune toggle
     teleop.tune=!teleop.tune;
+    ROS_INFO("Tuning Mode  : [%s]", teleop.tune ? "True" : "False");
   }
 
   else if(key->code==key->KEY_UP){
@@ -274,26 +326,45 @@ else if(key->code==100){ //d key for depth enable disable
   else if (key->code==key->KEY_0){
     if(teleop.enable){
       teleop.pitch_setpoint++;
+      ROS_INFO("Pitch increased: [%d]",teleop.pitch_setpoint);
     }
   }
 
   else if (key->code==key->KEY_8){
     if(teleop.enable){
       teleop.roll_setpoint++;
+      ROS_INFO("Roll increased: [%d]",teleop.roll_setpoint);
     }
   }
 
   else if (key->code==key->KEY_7){
     if(teleop.enable){
       teleop.roll_setpoint--;
+      ROS_INFO("Roll decreased: [%d]",teleop.roll_setpoint);
     }
   }
+
+
+
+
+
+
+  else if (key->code==key->KEY_l){   //enable line
+    inLine=!inLine;
+    ROS_INFO("Line Follower: [%s]",inLine?" Enabled":"Disabled");
+  }
+
+
 
    teleop.depth_setpoint=limit(teleop.depth_setpoint,0,800);
    teleop.heading_setpoint=limit(teleop.heading_setpoint,-179,179);
    teleop.pitch_setpoint=limit(teleop.pitch_setpoint,-60,60);
 
   }
+
+
+
+
   else{
     //teleop disabled:
     teleop.depth_setpoint=depth.depth;

@@ -79,6 +79,15 @@ struct teleop_speed{
 }teleop_velocity;
 
 
+
+//************* SAUVC
+
+bool oldPID;
+
+
+//*************
+
+
 void getVisionSidemove(const std_msgs::Int16& msg);
 void getOrientation(const sensor_msgs::Imu::ConstPtr& msg);
 void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg);
@@ -208,6 +217,8 @@ bool controller_srv_handler(srmauv_msgs::set_controller::Request &req,
 	inNavigation=req.navigation;
 	
 	res.complete=true;
+
+	ROS_INFO("Got controller service request");
 	return true;
 }
 
@@ -542,8 +553,7 @@ speed8_output=(int)(thruster8_ratio*speed8_output);
 void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output)
 {
 
-	if(teleop.depth_enable==false)
-		depthPID_output=0;
+
   double speed3_output = thruster3_ratio*(- depthPID_output + pitchPID_output - rollPID_output);
   double speed4_output = thruster4_ratio*(- depthPID_output + pitchPID_output + rollPID_output);
   double speed5_output = thruster5_ratio*(- depthPID_output - pitchPID_output + rollPID_output);
@@ -648,11 +658,37 @@ void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
  teleop_velocity.forward=msg->forward_speed;
  teleop.tune=msg->tune;
 
-	teleop.depth_enable=msg->depth_enable;
+
+
+
  if(!teleop.tune){
    ctrl.depth_setpoint=msg->depth_setpoint;
    ctrl.heading_setpoint=msg->heading_setpoint;
+   ctrl.pitch_setpoint=msg->pitch_setpoint;
+   ctrl.roll_setpoint=msg->roll_setpoint;
+
+   inDepthPID=msg->depth_enable;
+
+
+   if(msg->enable_pids!=oldPID){
+     ROS_INFO("PID's .. [%s]",msg->enable_pids? "Enabled": "False");
+
+   }
+   oldPID=msg->enable_pids;
+
+   if(!msg->enable_pids){
+     inPitchPID=inRollPID=inHeadingPID=false;
+    // ROS_INFO("PID's Disabled !");
+   }
+   else{
+     inPitchPID=inRollPID=inHeadingPID=true;
+   }
+
+
+
  }
+
+
 
 }
 
