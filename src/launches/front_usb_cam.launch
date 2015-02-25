@@ -1,7 +1,7 @@
 <launch>
 	<arg name="camera" default="front_usb_cam" />
 	
-    <node name="uvc_camera" pkg="uvc_camera" type="uvc_camera_node" output="screen" ns="sedna/front">
+    <node name="uvc_camera" pkg="uvc_camera" type="uvc_camera_node" output="screen" ns="sedna/camera/front">
    
         <param name="device" value="/dev/video0" />
         <param name="width" value="320" />
