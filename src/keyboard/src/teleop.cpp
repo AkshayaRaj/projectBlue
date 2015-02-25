@@ -41,6 +41,7 @@ bool in_pitch=false;
 bool inLine=false;
 
 bool shift=false;
+bool pid=false;
 //ros::NodeHandle *nh;
 
 
@@ -52,6 +53,7 @@ int main(int argc,char** argv){
   teleop.enable=false;
   teleop.tune=false;
 teleop.depth_enable=false;
+teleop.pid_enable=false;
 
   keyDown_sub=nh.subscribe("/keyboard/keydown",1000,keyDown);
   keyUp_sub=nh.subscribe("/keyboard/keyup",1000,keyUp);
@@ -69,9 +71,7 @@ ROS_INFO("Teleop dispatcher initialized..");
 
   while(ros::ok()){
 
-    if(!teleop.enable){
-    setCurrent();
-    }
+
 
   //  ROS_INFO("Teleop: %d\tDepth: %d\tHeading: %f\tForward: %d\tReverse: %d\tStrafe: %d",
  //            teleop.enable,teleop.depth_setpoint,teleop.heading_setpoint,teleop.forward_speed,teleop.reverse_speed,teleop.sidemove_speed);
@@ -151,15 +151,17 @@ void keyDown(const keyboard::KeyConstPtr & key){
       break;
     }
 
-
+    case 96 : {// ~ tune
+            teleop.tune=!teleop.tune;
+            break;  }
   }
 
   if(teleop.enable){
     switch(key->code){
       case 117: {   //u
-        teleop.depth_setpoint=depth.depth;
-        teleop.heading_setpoint=yaw;
-        ROS_INFO("Setpoints Updated ! -> Depth: %d\tHeading :%d ",teleop.depth_setpoint,(int)teleop.heading_setpoint );
+      //  teleop.depth_setpoint=depth.depth;
+    //    teleop.heading_setpoint=yaw;
+     //   ROS_INFO("Setpoints Updated ! -> Depth: %d\tHeading :%d ",teleop.depth_setpoint,(int)teleop.heading_setpoint );
         break;
       }
       case 45 : {  // -
@@ -184,11 +186,9 @@ void keyDown(const keyboard::KeyConstPtr & key){
         break;
       }
 
-      case 96 : {// ~ tune
-        teleop.tune=!teleop.tune;
-        break;
 
-      }
+
+
       case 304: {  //shift
         shift=true;
         break;
@@ -229,16 +229,23 @@ void keyDown(const keyboard::KeyConstPtr & key){
         teleop.sidemove_speed=120;
         break;
       }
+      case 112:{ //p : enable disable controllers except depth
+        teleop.pid_enable=!teleop.pid_enable;
+        break;
+      }
 
   }
 
- }
+
  // teleop.depth_setpoint=limit(teleop.depth_setpoint,0,800);
  // teleop.heading_setpoint=limit(teleop.heading_setpoint,-179,179);
  // teleop.pitch_setpoint=limit(teleop.pitch_setpoint,-60,60);
   //teleop.roll_setpoint=limit(teleop.roll_setpoint,-179,179);
 
 }
+
+}
+
 
 int limit(int value, int lower, int upper){
   if (value <=lower)

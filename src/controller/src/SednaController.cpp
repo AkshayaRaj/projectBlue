@@ -539,8 +539,7 @@ speed8_output=(int)(thruster8_ratio*speed8_output);
 void setVerticalThrustSpeed(double depthPID_output,double pitchPID_output,double rollPID_output)
 {
 
-	if(teleop.depth_enable==false)
-		depthPID_output=0;
+
   double speed3_output = thruster3_ratio*(- depthPID_output + pitchPID_output - rollPID_output);
   double speed4_output = thruster4_ratio*(- depthPID_output + pitchPID_output + rollPID_output);
   double speed5_output = thruster5_ratio*(- depthPID_output - pitchPID_output + rollPID_output);
@@ -574,7 +573,7 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 //	if(teleop.tune){
 	  ROS_INFO("Tuner Enabled");
 
-	ctrl.depth_input=config.depth_input;
+//	ctrl.depth_input=config.depth_input;
 
 	thruster1_ratio=config.thruster1_ratio;
 	thruster2_ratio=config.thruster2_ratio;
@@ -603,8 +602,8 @@ void callback(controller::controllerConfig &config, uint32_t level) {
 	inRollPID=config.roll_PID;
 
 
-	inTeleop=config.teleop;
-	inHovermode=config.hovermode;
+	//inTeleop=config.teleop;
+	//inHovermode=config.hovermode;
 
 	ctrl.depth_setpoint=config.depth_setpoint;
 	ctrl.heading_setpoint=config.heading_setpoint;
@@ -645,12 +644,17 @@ void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
  teleop_velocity.forward=msg->forward_speed;
  teleop.tune=msg->tune;
 
-	teleop.depth_enable=msg->depth_enable;
+
+
  if(!teleop.tune){
    ctrl.depth_setpoint=msg->depth_setpoint;
    ctrl.heading_setpoint=msg->heading_setpoint;
    ctrl.pitch_setpoint=msg->pitch_setpoint;
    ctrl.roll_setpoint=msg->roll_setpoint;
+   //teleop.depth_enable=msg->depth_enable;
+   inDepthPID=msg->depth_enable;
+   ROS_INFO("inDepth [%d]",inDepthPID);
+   inHeadingPID=inPitchPID=inRollPID=msg->pid_enable;
  }
 
 }
