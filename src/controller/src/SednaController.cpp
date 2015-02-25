@@ -234,7 +234,7 @@ int main (int argc,char **argv){
 	//ROS_INFO("inDepth? :%d" , inDepthPID);
 	ros::NodeHandle nh;
 	
-	teleop.tune=true;
+	teleop.tune=false;
 	teleop.depth_enable=false;
 //	ctrl.heading_setpoint=20;
 	thrusterPub=nh.advertise<srmauv_msgs::thruster>("/thruster_speed",1000);
