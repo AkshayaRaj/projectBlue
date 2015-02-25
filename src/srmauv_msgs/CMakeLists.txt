@@ -60,6 +60,8 @@ geometry_msgs
 	thruster.msg
 	vision.msg
 	teleop_sedna.msg
+	goal.msg
+	line.msg
 
  )
 

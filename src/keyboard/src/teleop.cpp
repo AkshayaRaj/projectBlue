@@ -7,11 +7,13 @@
 #include <std_msgs/Int16.h>
 #include <tf/tf.h>
 #include <geometry_msgs/Pose2D.h>
-
+#include <srmauv_msgs/goal.h>
+#include <srmauv_msgs/line.h>
 
 srmauv_msgs::teleop_sedna teleop;
 srmauv_msgs::depth depth;
 keyboard::Key key;
+
 
 int pressure;
 double yaw,pitch,roll;
@@ -24,19 +26,20 @@ ros::Subscriber teleopSetter;
 ros::Subscriber headingSub;
 ros::Publisher teleopPub;
 
-
+int limit(int value, int lower, int upper);
 void keyUp(const keyboard::KeyConstPtr& key);
 void keyDown(const keyboard::KeyConstPtr& key);
 void getPressure(const srmauv_msgs::depth &msg);
 void getOrientation(const sensor_msgs::Imu::ConstPtr &msg);
 void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg);
-void setTeleop(const srmauv_msgs::teleop_sedna::ConstPtr& msg);
+void setTeleop(const srmauv_msgs::goal::ConstPtr& msg);
 void setCurrent();
 bool in_depth=false;
 bool in_yaw=false;
 bool in_roll=false;
 bool in_pitch=false;
 
+bool shift=false;
 //ros::NodeHandle *nh;
 
 
@@ -100,164 +103,155 @@ void setCurrent(){
         teleop.reverse_speed=0;
 }
 
-void setTeleop(const srmauv_msgs::teleop_sedna::ConstPtr& msg){
-  teleop=*msg;
+void setTeleop(const srmauv_msgs::goal::ConstPtr& msg){
+  if(msg->goDepth)
+    teleop.depth_setpoint=msg->depth;
+  if(msg->goHeading)
+    teleop.heading_setpoint=msg->heading;
+  if(msg->goPitch)
+      teleop.pitch_setpoint=msg->pitch;
+   if(msg->goRoll)
+      teleop.roll_setpoint=msg->roll;
+
+      teleop.depth_setpoint=limit(teleop.depth_setpoint,0,800);
+      teleop.heading_setpoint=limit(teleop.heading_setpoint,-179,179);
+      teleop.pitch_setpoint=limit(teleop.pitch_setpoint,-60,60);
+      teleop.roll_setpoint=limit(teleop.roll_setpoint,-179,179);
+
 }
 
 void keyDown(const keyboard::KeyConstPtr & key){
  // ROS_INFO("%d pressed",key->code);
-  if(key->code==key->KEY_t){
-    teleop.enable=!teleop.enable;
-    setCurrent();
+
+  switch(key->code){
+    case 116: {   //t
+      teleop.enable=!teleop.enable;
+      break;
+    }
+
+    case 100: {
+      teleop.depth_enable=!teleop.depth_enable;
+      break;
+    }
+
 
   }
-
 
   if(teleop.enable){
-   if(key->code==key->KEY_u){ //update setpoints to current input
-    teleop.depth_setpoint=depth.depth;
-    teleop.heading_setpoint=yaw;
-
-    ROS_INFO("Setpoints Updated ! -> Depth: %d\tHeading :%d ",teleop.depth_setpoint,(int)teleop.heading_setpoint );
-
-  }
-  else if(key->code==key->KEY_MINUS){
-    if(teleop.enable)
-    teleop.depth_setpoint--;
-    else
-      teleop.depth_setpoint=depth.depth;
-    teleop.heading_setpoint=yaw;
-
-  }
-
-else if(key->code==100){ //d key for depth enable disable
-	teleop.depth_enable=!teleop.depth_enable;
-}
-
-
-  else if(key->code==key->KEY_EQUALS){
-    if(teleop.enable)
-    teleop.depth_setpoint++;
-    else
-      teleop.depth_setpoint=depth.depth;
-
-  }
-  else if(key->code==key->KEY_PAGEUP){
-    teleop.torpedo=true;
-  }
-  else if(key->code==key->KEY_PAGEDOWN){
-    teleop.dropper=true;
-  }
-
-  else if(key->code==key->KEY_LEFTBRACKET){
-    if(teleop.enable)
-      teleop.heading_setpoint--;
-    else
-      teleop.heading_setpoint=yaw;
-  }
-  else if(key->code==key->KEY_RIGHTBRACKET){
-    if(teleop.enable)
-      teleop.heading_setpoint++;
-    else
-      teleop.heading_setpoint=yaw;
-  }
-
-  else if(key->code==96){ //tune toggle
-    teleop.tune=!teleop.tune;
-  }
-
-  else if(key->code==key->KEY_UP){
-    if(teleop.enable){
-    int forward_vel=150;
-   //nh->param("/controller/teleop_forward_velocity",forward_vel,100);
-   teleop.forward_speed=forward_vel;
+    switch(key->code){
+      case 117: {   //u
+        teleop.depth_setpoint=depth.depth;
+        teleop.heading_setpoint=yaw;
+        ROS_INFO("Setpoints Updated ! -> Depth: %d\tHeading :%d ",teleop.depth_setpoint,(int)teleop.heading_setpoint );
+        break;
+      }
+      case 45 : {  // -
+        teleop.depth_setpoint--;
+        break;
     }
-    else{
-      teleop.forward_speed=0;
-    }
+      case 61: {  //=
+        teleop.depth_setpoint++;
+        break;
+
+      }
+      case 113: { //Q: dropper
+        teleop.dropper=true;
+        break;
+      }
+      case 91: { // {
+        shift?teleop.heading_setpoint-=10 : teleop.heading_setpoint--;
+        break;
+      }
+      case 93: { // }
+        shift?teleop.heading_setpoint+=10 : teleop.heading_setpoint++;
+        break;
+      }
+
+      case 96 : {// ~ tune
+        teleop.tune=!teleop.tune;
+        break;
+
+      }
+      case 304: {  //shift
+        shift=true;
+
+      }
+
+      case 48: { // 0
+        shift?teleop.pitch_setpoint+=10 : teleop.pitch_setpoint++;
+                break;
+      }
+      case 57: { // 9
+              shift?teleop.pitch_setpoint-=10 : teleop.pitch_setpoint--;
+                      break;
+            }
+      case 56: { // 8
+                    shift?teleop.roll_setpoint+=10 : teleop.roll_setpoint++;
+                            break;
+                  }
+      case 55: { // 7
+                    shift?teleop.roll_setpoint-=10 : teleop.roll_setpoint--;
+                            break;
+                  }
+
+      case 273: { // forward
+        teleop.forward_speed=150;
+        break;
+      }
+
+      case 274: { //reverse
+        teleop.forward_speed=-150;
+        break;
+      }
+      case 276 :{ //left
+        teleop.sidemove_speed=-120;
+      }
+      case 275 :{ //right
+        teleop.sidemove_speed=120;
+      }
 
   }
-  else if(key->code==key->KEY_DOWN){
-    if(teleop.enable){
-        int forward_vel=150;
-    //   nh.param("/controller/teleop_reverse_velocity",forward_vel,100);
-       teleop.forward_speed=-forward_vel;
-        }
-        else{
-          teleop.forward_speed=0;
-        }
-  }
 
-  else if(key->code==key->KEY_LEFT){
-    if(teleop.enable){
-        int side_vel=120;
-    //   nh.param("/controller/teleop_sidemove_velocity",side_vel,100);
-       teleop.sidemove_speed=side_vel;
-        }
-        else{
-          teleop.sidemove_speed=0;
-        }
-  }
-
-  else if(key->code==key->KEY_RIGHT){
-    if(teleop.enable){
-        int side_vel=120;
-   //    nh.param("/controller/teleop_sidemove_velocity",side_vel,100);
-       teleop.sidemove_speed=-side_vel;
-        }
-        else{
-          teleop.sidemove_speed=0;
-        }
-  }
-
-  if(teleop.depth_setpoint<0)
-    teleop.depth_setpoint=0;
-  else if(teleop.depth_setpoint>800)
-    teleop.depth_setpoint=800;
-
-  }
-
-  if(teleop.heading_setpoint<-179)
-    teleop.heading_setpoint=-179;
-  if(teleop.heading_setpoint>179)
-    teleop.heading_setpoint=179;
-
+ }
+  teleop.depth_setpoint=limit(teleop.depth_setpoint,0,800);
+  teleop.heading_setpoint=limit(teleop.heading_setpoint,-179,179);
+  teleop.pitch_setpoint=limit(teleop.pitch_setpoint,-60,60);
+  teleop.roll_setpoint=limit(teleop.roll_setpoint,-179,179);
 
 }
 
+int limit(int value, int lower, int upper){
+  if (value <=lower)
+    value=lower;
+    else if(value>=upper)
+      value =upper;
+  return value;
+}
 void keyUp(const keyboard::KeyConstPtr& key){
   //ROS_INFO("%d released",key->code);
 
    if(key->code==key->KEY_UP){
     if(teleop.enable){
-
    teleop.forward_speed=0;
     }
-
-
   }
+   else if(key->code==304){
+     shift=false;
+   }
   else if(key->code==key->KEY_DOWN){
     if(teleop.enable){
-
        teleop.forward_speed=0;
         }
-
   }
-
   else if(key->code==key->KEY_LEFT){
     if(teleop.enable){
-
        teleop.sidemove_speed=0;
         }
-
   }
-
   else if(key->code==key->KEY_RIGHT){
     if(teleop.enable){
-
        teleop.sidemove_speed=0;
     }
-
   }
   else if(key->code==key->KEY_PAGEUP){
      teleop.torpedo=false;

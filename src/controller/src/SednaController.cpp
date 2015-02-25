@@ -255,7 +255,7 @@ int main (int argc,char **argv){
 	//Initialize the ActionServer:
 
 	ControllerServer as("LocomotionServer");
-	//PID Loop will run at 20Hz
+	//PID Loop will run at
 	ros::Rate loop_rate(loop_frequency);
 	
 	//publish the initial standard mode locomotion mode message
@@ -285,7 +285,7 @@ int main (int argc,char **argv){
 			pidInfo.depth.i=depthPID.getIntegral();
 			pidInfo.depth.d=depthPID.getIntegral();
 			pidInfo.depth.total=depth_output;
-			ROS_INFO("P: %d\tI:%d\tD:%d\t total: %d\n",depthPID.getProportional(),depthPID.getIntegral(),depthPID.getDerivative(),depthPID.getTotal());
+		//	ROS_INFO("P: %d\tI:%d\tD:%d\t total: %d\n",depthPID.getProportional(),depthPID.getIntegral(),depthPID.getDerivative(),depthPID.getTotal());
 			
 		}
 		else{
