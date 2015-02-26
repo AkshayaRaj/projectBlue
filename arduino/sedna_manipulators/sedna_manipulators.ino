@@ -35,10 +35,7 @@ ros::Subscriber<std_msgs::Bool> dropper_sub("dropper",dropperCallback);
 
 
 void setup(){
-  pinMode(TORPEDO,OUTPUT);
-  pinMode(DROPPER,OUTPUT);
-  digitalWrite(TORPEDO,LOW);
-  digitalWrite(DROPPER,LOW);
+
   
   
   nh.initNode();
@@ -50,7 +47,7 @@ void setup(){
 void loop(){
        // currentTime=millis();
      //   if(currentTime>=(slow_loop+333)){
-        colorWipeFull(strip.Color(0, 40, 0), 50); 
+        //colorWipeFull(strip.Color(0, 40, 0), 50); 
        
         nh.spinOnce();
       
@@ -123,20 +120,23 @@ void emergencyCallback(const std_msgs::Bool &msg){
 
 void torpedoCallback(const std_msgs::Bool &msg){
    if(msg.data==true && torpedoArmed==true){
+     /*
      digitalWrite(TORPEDO,LOW);
      delay(500);
      digitalWrite(TORPEDO,HIGH);
      torpedoArmed=false;
-  
+  */
 }
 }
 
 void dropperCallback(const std_msgs::Bool &msg){
    if(msg.data==true && dropperArmed==true){
+     /*
      digitalWrite(DROPPER,LOW);
      delay(500);
      digitalWrite(DROPPER,HIGH);
      dropperArmed=false;
+     */
   
 }
 }
