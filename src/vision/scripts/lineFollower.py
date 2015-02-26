@@ -74,6 +74,7 @@ class Line:
         self.bridge=CvBridge()
         self.camera_topic=rospy.get_param('~image', '/sedna/camera/front/image_raw')
         self.image_filter_pub=rospy.Publisher("/Vision/image_filter",Image)
+	self.image_thresh_pub=rospy.Publisher("/Vision/image_thresh",Image)
         self.register()
         self.previousCentroid=(-1,-1)
         self.previousArea=0
@@ -104,14 +105,17 @@ class Line:
         #if self.blur:
         #    cv_image=cv2.GaussianBlur(cv_image,ksize=[5,5],sigmaX=0)
         #screen = { 'width' : 640, 'height' : 480 }
-        grayImg = cv2.cvtColor(cv_image, cv2.cv.CV_BGR2GRAY)
+        
+	grayImg = cv2.cvtColor(cv_image, cv2.cv.CV_BGR2GRAY)
         grayImg = cv2.resize(grayImg, dsize=(self.screen['width'], self.screen['height']))
         grayImg = cv2.GaussianBlur(grayImg, ksize=(7, 7), sigmaX=0)
 
         # Calculate adaptive threshold value
         mean = cv2.mean(grayImg)[0]
         lowest = cv2.minMaxLoc(grayImg)[0]
-        self.thval = min((mean + lowest) /self.val, self.upperThresh)
+        print "val =",self.val
+	print "upper thresh=",self.upperThresh
+	self.thval = min((mean + lowest) /self.val, self.upperThresh)
         rospy.logdebug(self.thval)
 
         #Thresholding and noise removal
@@ -180,19 +184,23 @@ class Line:
             #Testing
             centerx = int(centroid1)
             centery = int(centroid2)
-            cv2.circle(img, (centerx, centery), 5, (0, 255, 0))
+            cv2.circle(out, (centerx, centery), 5, (0, 255, 0))
 
             for i in range(4):
                 pt1 = (int(points[i][0]), int(points[i][1]))
                 pt2 = (int(points[(i+1)%4][0]), int(points[(i+1)%4][1]))
                 cv2.line(out, pt1, pt2, (255, 0, 0))
 
-            cv2.putText(out, str(angle), (30, 30),
+            cv2.putText(cv_image, str(angle), (30, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255))
+	    
+	    #grayImg=cv2.cvtColor(grayImg,cv2.COLOR_GRAY2BGR)	
         
         try:
-            self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(grayImg, encoding="bgr8"))
-        except CvBridgeError as e:
+            self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(out, encoding="bgr8"))
+            self.image_thresh_pub.publish(self.bridge.cv2_to_imgmsg(cv_image,encoding="bgr8"))
+	
+	except CvBridgeError as e:
             rospy.logerr(e)
 
 
