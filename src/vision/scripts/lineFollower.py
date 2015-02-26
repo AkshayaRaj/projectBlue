@@ -72,7 +72,7 @@ class Line:
 #        signal.signal(signal.SIGINT,self.userQuit)
         self.imgData={'detected':False}
         self.bridge=CvBridge()
-        self.camera_topic=rospy.get_param('~image', '/sedna/camera/bottom/image_raw')
+        self.camera_topic=rospy.get_param('~image', '/sedna/camera/front/image_raw')
         self.image_filter_pub=rospy.Publisher("/Vision/image_filter",Image)
         self.register()
         self.previousCentroid=(-1,-1)
@@ -191,7 +191,7 @@ class Line:
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255))
         
         try:
-            self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(out, encoding="bgr8"))
+            self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(grayImg, encoding="bgr8"))
         except CvBridgeError as e:
             rospy.logerr(e)
 
