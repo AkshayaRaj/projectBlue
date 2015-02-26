@@ -29,7 +29,7 @@ class Line:
 
     lowThresh=np.array([0,0,0])
     highThresh=np.array([0,0,0])
-    screen={'width':640,'height':480}
+    screen={'width':320,'height':240}
     image=None
     '''        
     circleParams = {'minRadius':13, 'maxRadius': 0 }
@@ -72,7 +72,7 @@ class Line:
 #        signal.signal(signal.SIGINT,self.userQuit)
         self.imgData={'detected':False}
         self.bridge=CvBridge()
-        self.camera_topic=rospy.get_param('~image', '/sedna/camera/front/image_raw')
+        self.camera_topic=rospy.get_param('~image', '/sedna/camera/bottom/image_raw')
         self.image_filter_pub=rospy.Publisher("/Vision/image_filter",Image)
 	self.image_thresh_pub=rospy.Publisher("/Vision/image_thresh",Image)
 	self.line_pub=rospy.Publisher("/line_follower",line)
@@ -80,10 +80,10 @@ class Line:
         self.previousCentroid=(-1,-1)
         self.previousArea=0
     	#self.found=False
-	lineMsg=line()
-	lineMsg.possible=False
-	lineMsg.heading=0
-	lineMsg.distance=0
+	self.lineMsg=line()
+	self.lineMsg.possible=False
+	self.lineMsg.heading=0
+	self.lineMsg.distance=0
         
         
     
@@ -154,6 +154,12 @@ class Line:
                 centroid2 = centroidy
                 #rectData['rect'] = cv2.minAreaRect(contour)
                 rect = cv2.minAreaRect(contour)
+                
+        if maxArea > 0:
+        	self.lineMsg.possible=True
+        else :
+        	self.lineMsg.possible=False
+        
         if maxArea > 0:
             #rectData['detected'] = True
             points = np.array(cv2.cv.BoxPoints(rect))
@@ -165,7 +171,7 @@ class Line:
             print "points1",points[1]
             print "points0",points[0]    
             print "edge1",edge1
-
+            
             
             #Choose the vertical edge
             if cv2.norm(edge1) > cv2.norm(edge2):
@@ -185,7 +191,9 @@ class Line:
             elif angle == -90:
                 if centroid1 < screen['width'] / 2:
                     angle = 90
-
+	    
+	    self.lineMsg.heading=int(angle)
+	    
             #Testing
             centerx = int(centroid1)
             centery = int(centroid2)
@@ -204,6 +212,7 @@ class Line:
         try:
             self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(out, encoding="bgr8"))
             self.image_thresh_pub.publish(self.bridge.cv2_to_imgmsg(cv_image,encoding="bgr8"))
+            self.line_pub.publish(self.lineMsg);
 	
 	
 	except CvBridgeError as e:

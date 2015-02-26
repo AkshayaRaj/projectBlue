@@ -29,7 +29,7 @@ class Line:
 
     lowThresh=np.array([0,0,0])
     highThresh=np.array([0,0,0])
-    screen={'width':640,'height':480}
+    screen={'width':320,'height':240}
     image=None
     '''        
     circleParams = {'minRadius':13, 'maxRadius': 0 }
@@ -72,7 +72,7 @@ class Line:
 #        signal.signal(signal.SIGINT,self.userQuit)
         self.imgData={'detected':False}
         self.bridge=CvBridge()
-        self.camera_topic=rospy.get_param('~image', '/sedna/camera/front/image_raw')
+        self.camera_topic=rospy.get_param('~image', '/sedna/camera/bottom/image_raw')
         self.image_filter_pub=rospy.Publisher("/Vision/image_filter",Image)
 	self.image_thresh_pub=rospy.Publisher("/Vision/image_thresh",Image)
 	self.line_pub=rospy.Publisher("/line_follower",line)

@@ -129,9 +129,13 @@ class Buoys:
 
         self.bridge=CvBridge()
 
-        self.camera_topic=rospy.get_param('~image', '/sedna/front/image_raw')
+        self.camera_topic=rospy.get_param('~image', '/sedna/camera/bottom/image_raw')
 
         self.image_filter_pub=rospy.Publisher("/vision/image_filter",Image)
+	self.image_1_pub=rospy.Publisher("/vision/image_1",Image)	
+#	self.image_2_pub=rospy.Publisher("/vision/image_2",Image)
+#	self.image_3_pub=rospy.Publisher("/vision/image_3",Image)
+
 
         self.register()
 
@@ -143,7 +147,7 @@ class Buoys:
 
         
 
-        
+       
 
     
 
@@ -155,13 +159,13 @@ class Buoys:
 
         self.lowThresh[1]=config['loU']
 
-        self.lowThresh[2]=config['loV']
+        self.lowThresh[2]=config['hiV']
 
         self.highThresh[0]=config['hiL']
 
         self.highThresh[1]=config['hiU']
 
-        self.highThresh[2]=config['hiV']
+        self.highThresh[2]=config['loV']
 
         self.minContourArea=config['minContourArea']
 
@@ -198,7 +202,7 @@ class Buoys:
 
         #Added Code
 
-        
+	'''        
 
         inB, inG, inR = cv2.split(cv_image)
 
@@ -260,11 +264,11 @@ class Buoys:
 
         outImg = cv2.merge((np.uint8(outB), np.uint8(outG), np.uint8(outR)))    
 
+	'''
 
 
 
-
-        channels=cv2.split(outImg)
+        channels=cv2.split(cv_image)
 
         channels[0] = cv2.equalizeHist(channels[0])
 
@@ -291,24 +295,25 @@ class Buoys:
         enhancedImg = cv2.medianBlur(sum, 3)
 
         ch=cv2.split(enhancedImg)
+	print "value",self.highThresh[2]
 
-        mask = cv2.inRange(ch[2],self.highThresh[2],self.lowThresh[2])
+        mask = cv2.inRange(ch[1],self.highThresh[2],self.lowThresh[2])
 
-        mask1=cv2.inRange(ch[1],self.highThresh[0],self.lowThresh[0])
+   #     mask1=cv2.inRange(ch[1],self.highThresh[0],self.lowThresh[0])
 
-        mask2=cv2.inRange(ch[2],self.highThresh[1],self.lowThresh[1])
+  #      mask2=cv2.inRange(ch[2],self.highThresh[1],self.lowThresh[1])
 	
 	mas=mask.copy()
-	mas1=mask1.copy()
-	mas2=mask2.copy()	
+#	mas1=mask1.copy()
+#	mas2=mask2.copy()	
 
         #ADDED
 
         self.cir(mas)
 	
-        self.cir(mas1)
+#        self.cir(mas1)
 
-        self.cir(mas2)
+ #       self.cir(mas2)
 
 
 
@@ -319,11 +324,15 @@ class Buoys:
         #cv2.imshow(mask2)
 
         mask_out=cv2.cvtColor(mask,cv2.COLOR_GRAY2BGR)
-
+#	mask_out1=cv2.cvtColor(mas1,cv2.COLOR_GRAY2BGR)
+#	mask_out2=cv2.cvtColor(mas2,cv2.COLOR_GRAY2BGR)
+#	mask_out3=cv2.cvtColor(mask,cv2.COLOR_GRAY2BGR)
         try:
 
             self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(mask_out, encoding="bgr8"))
-
+	   # self.image_1_pub.publish(self.bridge.cv2_to_imgmsg(mask_out1, encoding="bgr8"))
+	  #  self.image_2_pub.publish(self.bridge.cv2_to_imgmsg(mask_out2, encoding="bgr8"))
+         #   self.image_3_pub.publish(self.bridge.cv2_to_imgmsg(mask_out3, encoding="bgr8"))	
         except CvBridgeError as e:
 
             rospy.logerr(e)
@@ -370,7 +379,7 @@ class Buoys:
 
             y=math.tan(b)
 
-            w=320
+            w=160
 
             x=d-w
 
@@ -474,15 +483,7 @@ class Buoys:
 
                         previousArea = rectArea
 
-                    else:
-
-                        centroidToBump = previousCentroid
-
-                        rectArea = previousArea
-
-
-
-	'''
+                 '''
 
         
 
