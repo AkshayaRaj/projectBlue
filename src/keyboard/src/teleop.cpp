@@ -12,6 +12,7 @@
 
 srmauv_msgs::teleop_sedna teleop;
 srmauv_msgs::depth depth;
+srmauv_msgs::line line;
 keyboard::Key key;
 
 
@@ -24,6 +25,7 @@ ros::Subscriber pressureSub;
 ros::Subscriber imuSub;
 ros::Subscriber teleopSetter;
 ros::Subscriber headingSub;
+ros::Subscriber lineSub;
 ros::Publisher teleopPub;
 
 int limit(int value, int lower, int upper);
@@ -34,6 +36,8 @@ void getOrientation(const sensor_msgs::Imu::ConstPtr &msg);
 void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg);
 void setTeleop(const srmauv_msgs::goal::ConstPtr& msg);
 void setCurrent();
+void runMission();
+void getLine(const srmauv_msgs::line::ConstPtr&msg);
 bool in_depth=false;
 bool in_yaw=false;
 bool in_roll=false;
@@ -61,7 +65,7 @@ teleop.pid_enable=false;
   imuSub=nh.subscribe("/imu/data",1000,getOrientation);
   headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
   teleopSetter=nh.subscribe("/teleop_set",100,setTeleop);
-
+  lineSub=nh.subscribe("/line_follower",1000,getTeleop);
   teleopPub=nh.advertise<srmauv_msgs::teleop_sedna>("/teleop_sedna",1000);
 
 ROS_INFO("Teleop dispatcher initialized..");
@@ -75,6 +79,8 @@ ROS_INFO("Teleop dispatcher initialized..");
 
   //  ROS_INFO("Teleop: %d\tDepth: %d\tHeading: %f\tForward: %d\tReverse: %d\tStrafe: %d",
  //            teleop.enable,teleop.depth_setpoint,teleop.heading_setpoint,teleop.forward_speed,teleop.reverse_speed,teleop.sidemove_speed);
+
+    runMission();
     teleopPub.publish(teleop);
     ROS_INFO("Spinning..");
 
@@ -89,6 +95,15 @@ ROS_INFO("Teleop dispatcher initialized..");
 
 	return 0;
 }
+
+
+void runMission(){
+  if(inLine && line.possible){
+    teleop.heading_setpoint+line.heading;
+
+  }
+}
+
 void getPressure(const srmauv_msgs::depth &msg){
   depth.depth=msg.depth;
 
@@ -101,6 +116,12 @@ void getOrientation(const sensor_msgs::Imu::ConstPtr &msg){
 
 void getHeading(const geometry_msgs::Pose2D::ConstPtr& msg){
   yaw=msg->theta;
+}
+
+void getLine(const srmauv_msgs::line::ConstPtr&msg){
+  line.possible=msg->possible;
+  line.heading=msg->heading;
+  line.distance=msg->distance;
 }
 
 void setCurrent(){
@@ -164,6 +185,8 @@ void keyDown(const keyboard::KeyConstPtr & key){
      //   ROS_INFO("Setpoints Updated ! -> Depth: %d\tHeading :%d ",teleop.depth_setpoint,(int)teleop.heading_setpoint );
         break;
       }
+
+
       case 45 : {  // -
         shift?teleop.depth_setpoint-=10 : teleop.depth_setpoint--;
         break;
@@ -231,6 +254,11 @@ void keyDown(const keyboard::KeyConstPtr & key){
       }
       case 112:{ //p : enable disable controllers except depth
         teleop.pid_enable=!teleop.pid_enable;
+        break;
+      }
+
+      case 108: {  // l : enable/disable lineFollower
+        inLine=!inLine;
         break;
       }
 
