@@ -27,7 +27,7 @@ from srmauv_msgs.msg import  *
 
 from srmauv_msgs.srv import *
 
-import vision.cfg.buoyConfig as Config
+import vision.cfg.flareConfig as Config
 
 from unittest import signals
 
@@ -128,11 +128,10 @@ class Buoys:
         self.imgData={'detected':False}
 
         self.bridge=CvBridge()
-
-        self.camera_topic=rospy.get_param('~image', '/sedna/camera/bottom/image_raw')
-
-        self.image_filter_pub=rospy.Publisher("/vision/image_filter",Image)
-	self.image_1_pub=rospy.Publisher("/vision/image_1",Image)	
+	self.flare_pub=rospy.Publisher("/flare",flare)
+        self.camera_topic=rospy.get_param('~image', '/sedna/camera/bottom/image_raw')	
+        self.image_filter_pub=rospy.Publisher("/vision/flare/image_filter",Image)
+	self.image_1_pub=rospy.Publisher("/vision/flare/thresh",Image)	
 #	self.image_2_pub=rospy.Publisher("/vision/image_2",Image)
 #	self.image_3_pub=rospy.Publisher("/vision/image_3",Image)
 
@@ -147,7 +146,7 @@ class Buoys:
 
         
 
-       
+      	self.flare_msg=flare() 
 
     
 
@@ -155,21 +154,21 @@ class Buoys:
 
         rospy.loginfo('Reconfigure request !')
 
-        self.lowThresh[0]=config['loL']
+       # self.lowThresh[0]=config['loL']
 
-        self.lowThresh[1]=config['loU']
+        #self.lowThresh[1]=config['loU']
 
         self.lowThresh[2]=config['hiV']
 
-        self.highThresh[0]=config['hiL']
+        #self.highThresh[0]=config['hiL']
 
-        self.highThresh[1]=config['hiU']
+        #self.highThresh[1]=config['hiU']
 
         self.highThresh[2]=config['loV']
 
         self.minContourArea=config['minContourArea']
 
-        self.blur=config['blur']
+        #self.blur=config['blur']
 
         print "configured" 
 
@@ -295,7 +294,7 @@ class Buoys:
         enhancedImg = cv2.medianBlur(sum, 3)
 
         ch=cv2.split(enhancedImg)
-	print "value",self.highThresh[2]
+	#print "value",self.highThresh[2]
 
         mask = cv2.inRange(ch[1],self.highThresh[2],self.lowThresh[2])
 
@@ -309,7 +308,7 @@ class Buoys:
 
         #ADDED
 
-        self.cir(mas)
+        self.cir(mas,cv_image)
 	
 #        self.cir(mas1)
 
@@ -329,8 +328,9 @@ class Buoys:
 #	mask_out3=cv2.cvtColor(mask,cv2.COLOR_GRAY2BGR)
         try:
 
-            self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(mask_out, encoding="bgr8"))
-	   # self.image_1_pub.publish(self.bridge.cv2_to_imgmsg(mask_out1, encoding="bgr8"))
+            self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, encoding="bgr8"))
+	    self.image_1_pub.publish(self.bridge.cv2_to_imgmsg(mask_out, encoding="bgr8"))
+	    self.flare_pub.publish(self.flare_msg);
 	  #  self.image_2_pub.publish(self.bridge.cv2_to_imgmsg(mask_out2, encoding="bgr8"))
          #   self.image_3_pub.publish(self.bridge.cv2_to_imgmsg(mask_out3, encoding="bgr8"))	
         except CvBridgeError as e:
@@ -343,24 +343,28 @@ class Buoys:
 
     
 
-    def cir(self,im):
+    def cir(self,im,cv_image):
 
-
-
+	
         contours, hierachy = cv2.findContours(im, cv2.RETR_EXTERNAL,
 
                                               cv2.CHAIN_APPROX_NONE)
 
-        cv2.drawContours(im, contours,-1, (0,255,0), 3)
+        #cv2.drawContours(mask, contours,-1, (0,255,0), 3)
 
         contours = filter(lambda c: cv2.contourArea(c) >self.minContourArea, contours)
 
         contours = sorted(contours, key=cv2.contourArea, reverse=True) # Sort by largest contour
 
+	if len(contours) > 0 :
+		self.flare_msg.possible=True
+	else : 
+		self.flare_msg.possible=False
+
         if len(contours) > 0:
 
             largestContour = contours[0]
-
+	   
             mu = cv2.moments(largestContour)
 
             muArea = mu['m00']
@@ -369,7 +373,7 @@ class Buoys:
 
             d=(int(mu['m10']/muArea))
 
-	# cv2.circle(img,centroidToBump,2,(0,255,0),3)
+	    cv2.circle(cv_image,centroidToBump,2,(0,255,0),3)
 
             #for yaw value
 
@@ -379,20 +383,20 @@ class Buoys:
 
             y=math.tan(b)
 
-            w=160
+            w=self.screen['width']/2
 
             x=d-w
 
-            print("offset",x)
+            #print("offset",x)
 
             fin=math.atan(y*x/w)
 
-            print ("final",fin)
+            #print ("final",fin)
 
-            print("degrees",math.degrees(fin))
+            #print("degrees",math.degrees(fin))
 
-          
-
+            self.flare_msg.heading_offset=int(math.degrees(fin))
+	    self.flare_msg.y_offset=self.screen['height']/2 - centroidToBump[1]
             #CENTER POINT VALUES
 
 
@@ -535,7 +539,7 @@ class Buoys:
 
 if __name__=="__main__":
 
-    rospy.init_node("buoy_detector")
+    rospy.init_node("flare_detector")
 
     buoys=Buoys()
 

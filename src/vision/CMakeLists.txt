@@ -19,6 +19,7 @@ generate_dynamic_reconfigure_options(
 	cfg/Tutorials.cfg
 	cfg/dropper.cfg
 	cfg/line.cfg	
+	cfg/flare.cfg
 )
 
 find_package(OpenCV)
