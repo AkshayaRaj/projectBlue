@@ -65,7 +65,7 @@ teleop.pid_enable=false;
   imuSub=nh.subscribe("/imu/data",1000,getOrientation);
   headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
   teleopSetter=nh.subscribe("/teleop_set",100,setTeleop);
-  lineSub=nh.subscribe("/line_follower",1000,getTeleop);
+  lineSub=nh.subscribe("/line_follower",1000,setTeleop);
   teleopPub=nh.advertise<srmauv_msgs::teleop_sedna>("/teleop_sedna",1000);
 
 ROS_INFO("Teleop dispatcher initialized..");
