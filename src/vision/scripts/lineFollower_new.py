@@ -246,7 +246,7 @@ class Line:
 
         #th2= cv2.threshold(grayImg,self.val1,self.val2,cv2.THRESH_TOZERO_INV)[1]
 
-        th3 = cv2.threshold(grayImg,self.val,self.val2,cv2.THRESH_BINARY_INV)[1]
+        grayImg = cv2.threshold(grayImg,self.val1,self.val2,cv2.THRESH_BINARY_INV)[1]
 
         dilateEl = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
 
@@ -256,7 +256,7 @@ class Line:
 
         #grayImg = cv2.erode(grayImg, erodeEl)
 
-        grayImg = cv2.dilate(th3, dilateEl)
+        grayImg = cv2.dilate(grayImg, dilateEl)
 
         grayImg = cv2.morphologyEx(grayImg, cv2.MORPH_OPEN, openEl)
 
