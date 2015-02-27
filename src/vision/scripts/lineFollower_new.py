@@ -146,7 +146,7 @@ class Line:
 
         self.bridge=CvBridge()
 
-        self.camera_topic=rospy.get_param('~image', '/sedna/camera/front/image_raw')
+        self.camera_topic=rospy.get_param('~image', '/sedna/camera/bottom/image_raw')
 
         self.image_fil_pub=rospy.Publisher("/Vision/image_fil",Image)
 
