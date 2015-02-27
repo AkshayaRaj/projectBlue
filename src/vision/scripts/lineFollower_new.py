@@ -22,7 +22,7 @@ from srmauv_msgs.msg import  *
 
 from srmauv_msgs.srv import *
 
-import vision.cfg.buoyConfig as Config
+import vision.cfg.linenConfig as Config
 
 from unittest import signals
 
@@ -60,7 +60,7 @@ class Line:
 
     highThresh=np.array([0,0,0])
 
-    screen={'width':640,'height':480}
+    screen={'width':320,'height':240}
 
     image=None
 
@@ -153,6 +153,8 @@ class Line:
         self.image_fil1_pub=rospy.Publisher("/Vision/image_fil1",Image)
 
         self.image_fil2_pub=rospy.Publisher("/Vision/image_fil2",Image)
+	self.line_pub=rospy.Publisher("/line_follower",line)
+
 
         self.register()
 
@@ -162,7 +164,11 @@ class Line:
 
     	#self.found=False
 
-        
+        self.lineMsg=line()
+        self.lineMsg.possible=False
+        self.lineMsg.heading=0
+        self.lineMsg.distance=0
+
 
         
 
@@ -172,17 +178,13 @@ class Line:
 
         rospy.loginfo('Reconfigure request !')
 
-        self.val1 = config['loL']
+        self.val1 = config['threshLow']
 
-        self.val2 = config['loU']
+        self.val2 = config['threshHigh']
 
-        self.val3 = config['loV']
-
-        self.val4 = config['hiL']
-
-        self.val5 = config['hiU']
-
-        self.val6 = config['hiV']
+        self.upperAreaThresh=config['upperAreaThresh']
+	self.areaThresh=config['areaThresh']
+	
 	
         
 
@@ -244,9 +246,9 @@ class Line:
 
         #th1 = cv2.threshold(cv_image,self.val1,self.val2,cv2.THRESH_BINARY_INV)[1]
 
-        #th2= cv2.threshold(grayImg,self.val1,self.val2,cv2.THRESH_TOZERO_INV)[1]
+        grayImg= cv2.threshold(grayImg,self.val1,self.val2,cv2.THRESH_TOZERO_INV)[1]
 
-        grayImg = cv2.threshold(grayImg,self.val1,self.val2,cv2.THRESH_BINARY_INV)[1]
+#        grayImg = cv2.threshold(grayImg,self.val1,self.val2,cv2.THRESH_BINARY_INV)[1]
 
         dilateEl = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
 
@@ -302,12 +304,18 @@ class Line:
 
                 rect = cv2.minAreaRect(contour)
 
+	if maxArea > 0:
+                self.lineMsg.possible=True
+        else :
+                self.lineMsg.possible=False
+
         if maxArea > 0:
 
             #rectData['detected'] = True
 
             points = np.array(cv2.cv.BoxPoints(rect))
 
+	    self.lineMsg.distance=int(centroid1 - self.screen['width']/2)
 
 
             #Find the blackline heading
@@ -363,6 +371,7 @@ class Line:
                 if centroid1 < screen['width'] / 2:
 
                     angle = 90
+	    self.lineMsg.heading=int(angle)
 
 
 
@@ -403,6 +412,8 @@ class Line:
            # self.image_fil1_pub.publish(self.bridge.cv2_to_imgmsg(ath2, encoding="bgr8"))
 
             self.image_fil2_pub.publish(self.bridge.cv2_to_imgmsg(out, encoding="bgr8"))
+	
+            self.line_pub.publish(self.lineMsg);
 
         except CvBridgeError as e:
 
