@@ -283,7 +283,7 @@ int main (int argc,char **argv){
 			depth_output=depthPID.computePID((double)ctrl.depth_setpoint,ctrl.depth_input)*-1;
 			pidInfo.depth.p=depthPID.getProportional();
 			pidInfo.depth.i=depthPID.getIntegral();
-			pidInfo.depth.d=depthPID.getIntegral();
+			pidInfo.depth.d=depthPID.getDerivative();
 			pidInfo.depth.total=depth_output;
 		//	ROS_INFO("P: %d\tI:%d\tD:%d\t total: %d\n",depthPID.getProportional(),depthPID.getIntegral(),depthPID.getDerivative(),depthPID.getTotal());
 			
@@ -297,7 +297,7 @@ int main (int argc,char **argv){
 				heading_output=getHeadingPIDUpdate();
 				pidInfo.heading.p=headingPID.getProportional();
 				pidInfo.heading.i=headingPID.getIntegral();
-				pidInfo.heading.d=headingPID.getIntegral();
+				pidInfo.heading.d=headingPID.getDerivative();
 				pidInfo.heading.total=headingPID.getTotal();
 
 		}
@@ -310,7 +310,7 @@ int main (int argc,char **argv){
 			pitch_output=pitchPID.computePID((double)ctrl.pitch_setpoint,ctrl.pitch_input);
 			 pidInfo.pitch.p=depthPID.getProportional();
                         pidInfo.pitch.i=pitchPID.getIntegral();
-                        pidInfo.pitch.d=pitchPID.getIntegral();
+                        pidInfo.pitch.d=pitchPID.getDerivative();
                         pidInfo.pitch.total=pitch_output;
 
 
@@ -325,7 +325,7 @@ int main (int argc,char **argv){
 		                        roll_output=rollPID.computePID((double)ctrl.roll_setpoint,ctrl.roll_input);
 		                         pidInfo.roll.p=depthPID.getProportional();
 		                        pidInfo.roll.i=rollPID.getIntegral();
-		                        pidInfo.roll.d=rollPID.getIntegral();
+		                        pidInfo.roll.d=rollPID.getDerivative();
 		                        pidInfo.roll.total=roll_output;
 
 
