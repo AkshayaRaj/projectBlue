@@ -20,6 +20,7 @@ generate_dynamic_reconfigure_options(
 	cfg/dropper.cfg
 	cfg/line.cfg	
 	cfg/flare.cfg
+	cfg/linen.cfg
 )
 
 find_package(OpenCV)
