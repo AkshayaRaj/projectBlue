@@ -68,7 +68,7 @@ inLineBool.data=false;
   pressureSub=nh.subscribe("/pressure_data",1000,getPressure);
   imuSub=nh.subscribe("/imu/data",1000,getOrientation);
   headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
-  teleopSetter=nh.subscribe("/teleop_set",100,setTeleop);
+  teleopSetter=nh.subscribe("/teleop_set",1000,setTeleop);
   lineSub=nh.subscribe("/line_follower",1000,getLine);
   inLinePub=nh.advertise<std_msgs::Bool>("/inLine",100);
   teleopPub=nh.advertise<srmauv_msgs::teleop_sedna>("/teleop_sedna",1000);
@@ -146,7 +146,7 @@ void setCurrent(){
 }
 
 void setTeleop(const srmauv_msgs::goal::ConstPtr& msg){
-  if(msg->goDepth)
+  if(msg->goDepth==true)
     teleop.depth_setpoint=msg->depth;
   if(msg->goHeading)
     teleop.heading_setpoint=msg->heading;
@@ -155,7 +155,7 @@ void setTeleop(const srmauv_msgs::goal::ConstPtr& msg){
    if(msg->goRoll)
       teleop.roll_setpoint=msg->roll;
 
-      teleop.depth_setpoint=limit(teleop.depth_setpoint,0,800);
+//      teleop.depth_setpoint=limit(teleop.depth_setpoint,0,800);
       teleop.heading_setpoint=limit(teleop.heading_setpoint,-179,179);
       teleop.pitch_setpoint=limit(teleop.pitch_setpoint,-60,60);
       teleop.roll_setpoint=limit(teleop.roll_setpoint,-179,179);

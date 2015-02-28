@@ -35,6 +35,6 @@
 
 
 #define LPF_CONSTANT 0.7
-#define WATER_LEAK_THRESH 900
+#define WATER_LEAK_THRESH 1000
 #define SURFACE 1400
 

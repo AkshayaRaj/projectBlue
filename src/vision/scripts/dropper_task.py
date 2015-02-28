@@ -136,7 +136,7 @@ class Drops:
 
         self.camera_topic=rospy.get_param('~bottom_camera_topic', '/sedna/camera/bottom/image_raw')
 
-        self.image_filter_pub=rospy.Publisher("~/vision/image_filter",Image)
+        self.image_filter_pub=rospy.Publisher("~/vision/dropper/image_filter",Image)
 
         self.line_pub=rospy.Publisher("/line_follower",line)
 

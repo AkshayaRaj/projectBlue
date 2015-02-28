@@ -281,11 +281,12 @@ int main (int argc,char **argv){
 
 		if(inSidemovePID)
 		{
-			sidemove_output=sidemovePID.computePID(0,ctrl.sidemove_input);
+			sidemove_output=sidemovePID.computePID((double)0.0,ctrl.sidemove_input);
 			pidInfo.sidemove.p=sidemovePID.getProportional();
                         pidInfo.sidemove.i=sidemovePID.getIntegral();
                         pidInfo.sidemove.d=sidemovePID.getDerivative();
-			pidInfo.sidemove.total=sidemove_output;	
+			pidInfo.sidemove.total=sidemove_output;
+			
 
 		}
 		else
@@ -323,7 +324,7 @@ int main (int argc,char **argv){
 
 		if(inPitchPID){
 			pitch_output=pitchPID.computePID((double)ctrl.pitch_setpoint,ctrl.pitch_input);
-			 pidInfo.pitch.p=depthPID.getProportional();
+			 pidInfo.pitch.p=pitchPID.getProportional();
                         pidInfo.pitch.i=pitchPID.getIntegral();
                         pidInfo.pitch.d=pitchPID.getDerivative();
                         pidInfo.pitch.total=pitch_output;
@@ -338,7 +339,7 @@ int main (int argc,char **argv){
 
 		if(inRollPID){
 		                        roll_output=rollPID.computePID((double)ctrl.roll_setpoint,ctrl.roll_input);
-		                         pidInfo.roll.p=depthPID.getProportional();
+		                         pidInfo.roll.p=rollPID.getProportional();
 		                        pidInfo.roll.i=rollPID.getIntegral();
 		                        pidInfo.roll.d=rollPID.getDerivative();
 		                        pidInfo.roll.total=roll_output;
@@ -503,13 +504,13 @@ else{
 }
 
 #ifndef REVERSE
-  double speed7_output=(-headingPID_output+teleop_velocity.sidemove+sidemovePID_output);
-  double speed8_output=(headingPID_output+teleop_velocity.sidemove+sidemovePID_output);
+  double speed7_output=(-headingPID_output+teleop_velocity.sidemove-sidemovePID_output);
+  double speed8_output=(headingPID_output+teleop_velocity.sidemove-sidemovePID_output);
 #endif
 
 #ifdef REVERSE
-  double speed7_output=(headingPID_output+teleop_velocity.sidemove+sidemovePID_output);
-  double speed8_output=(-headingPID_output+teleop_velocity.sidemove+sidemovePID_output);
+  double speed7_output=(headingPID_output+teleop_velocity.sidemove-sidemovePID_output);
+  double speed8_output=(-headingPID_output+teleop_velocity.sidemove-sidemovePID_output);
 #endif
 
 if(speed7_output<0)
@@ -644,6 +645,11 @@ void callback(controller::controllerConfig &config, uint32_t level) {
         rollPID.setTd(config.roll_Td);
         rollPID.setTi(config.roll_Ti);
         rollPID.setActuatorSatModel(config.roll_min,config.roll_max);
+	
+	sidemovePID.setKp(config.sidemove_Kp);
+        sidemovePID.setTd(config.sidemove_Td);
+        sidemovePID.setTi(config.sidemove_Ti);
+        sidemovePID.setActuatorSatModel(config.sidemove_min,config.sidemove_max);
 
      //   forwardPID.setKp(config.forward_Kp);
      //   forwardPID.setTd(config.forward_Td);
@@ -670,9 +676,15 @@ void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
    inDepthPID=msg->depth_enable;
    ROS_INFO("inDepth [%d]",inDepthPID);
    inHeadingPID=inPitchPID=inRollPID=msg->pid_enable;
-	inSidemovePID=true; /// this might not be a good idea.. but sidemove pid is always on 
+	//inSidemovePID=true; /// this might not be a good idea.. but sidemove pid is always on 
 	ctrl.sidemove_input=msg->sidemove_input;   // if not using sidemove make sidemove_input = 0
- }
+	
+	if(msg->sidemove_input==0)
+		inSidemovePID=false;
+	else
+		inSidemovePID=true;
+	
+ 	}
 
 }
 
