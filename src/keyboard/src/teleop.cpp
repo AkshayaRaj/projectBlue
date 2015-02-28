@@ -253,20 +253,20 @@ void keyDown(const keyboard::KeyConstPtr & key){
                   }
 
       case 273: { // forward
-        teleop.forward_speed=150;
+        teleop.forward_speed=190;
         break;
       }
 
       case 274: { //reverse
-        teleop.forward_speed=-150;
+        teleop.forward_speed=-190;
         break;
       }
       case 276 :{ //left
-        teleop.sidemove_speed=-120;
+        teleop.sidemove_speed=-220;
         break;
       }
       case 275 :{ //right
-        teleop.sidemove_speed=120;
+        teleop.sidemove_speed=220;
         break;
       }
       case 112:{ //p : enable disable controllers except depth
