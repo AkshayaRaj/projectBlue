@@ -670,7 +670,8 @@ void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
    inDepthPID=msg->depth_enable;
    ROS_INFO("inDepth [%d]",inDepthPID);
    inHeadingPID=inPitchPID=inRollPID=msg->pid_enable;
-	inSidemovePID=true;
+	inSidemovePID=true; /// this might not be a good idea.. but sidemove pid is always on 
+	ctrl.sidemove_input=msg->sidemove_input;   // if not using sidemove make sidemove_input = 0
  }
 
 }
