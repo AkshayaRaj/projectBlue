@@ -114,7 +114,7 @@ inLinePub.publish(inLineBool);
   else
 	{
 		teleop.sidemove_input=0;
-	{
+	}
 }
 
 void getPressure(const srmauv_msgs::depth &msg){
@@ -209,7 +209,7 @@ void keyDown(const keyboard::KeyConstPtr & key){
         break;
 
       }
-      case 115 { //s : enable/disable sidemove pid
+      case 115 : { //s : enable/disable sidemove pid
 	inSidemove=!inSidemove;
 	break;
 	}
