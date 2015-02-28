@@ -268,8 +268,8 @@ int main (int argc,char **argv){
 	{
 		if(inHovermode && oldHovermode!=inHovermode) // so we hover over a point
 		{
-			ctrl.forward_setpoint=ctrl.forward_input;
-			ctrl.sidemove_setpoint=ctrl.sidemove_input;
+			//ctrl.forward_setpoint=ctrl.forward_input;
+			//ctrl.sidemove_setpoint=ctrl.sidemove_input;
 			//ctrl.depth_setpoint=ctrl.depth_input;
 			//ctrl.pitch_setpoint=ctrl.depth_input;
 			//ctrl.heading_setpoint=ctrl.heading_input;
@@ -277,6 +277,21 @@ int main (int argc,char **argv){
 			oldHovermode=inHovermode;			
 		
 
+		}
+
+		if(inSidemovePID)
+		{
+			sidemove_output=sidemovePID.computePID(0,ctrl.sidemove_input);
+			pidInfo.sidemove.p=sidemovePID.getProportional();
+                        pidInfo.sidemove.i=sidemovePID.getIntegral();
+                        pidInfo.sidemove.d=sidemovePID.getDerivative();
+			
+
+		}
+		else
+		{
+			sidemove_output=0;
+			sidemovePID.clearIntegrator();
 		}
 		if(inDepthPID)
 		{
@@ -432,7 +447,7 @@ double fmap(int input, int in_min, int in_max, int out_min, int out_max){
 
 
 
-void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemovePID_output)
+void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemove_output)
 {
   //write code for forward movement
 
@@ -488,13 +503,13 @@ else{
 }
 
 #ifndef REVERSE
-  double speed7_output=(-headingPID_output+teleop_velocity.sidemove);
-  double speed8_output=(headingPID_output+teleop_velocity.sidemove);
+  double speed7_output=(-headingPID_output+teleop_velocity.sidemove+sidemove_output);
+  double speed8_output=(headingPID_output+teleop_velocity.sidemove+sidemove_output);
 #endif
 
 #ifdef REVERSE
-  double speed7_output=(headingPID_output+teleop_velocity.sidemove);
-  double speed8_output=(-headingPID_output+teleop_velocity.sidemove);
+  double speed7_output=(headingPID_output+teleop_velocity.sidemove+sidemove_output);
+  double speed8_output=(-headingPID_output+teleop_velocity.sidemove+sidemove_output);
 #endif
 
 if(speed7_output<0)

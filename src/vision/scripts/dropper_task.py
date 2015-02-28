@@ -208,7 +208,35 @@ class Drops:
             area = cv2.contourArea(contours[0])
 
             print area 
+            
+	    mu = cv2.moments(contour, False)
+	    muArea = mu['m00']		    
+	
+	    d=(int(mu['m10']/muArea))
+            centroidx = mu['m10'] / mu['m00']
 
+            centroidy = mu['m01'] / mu['m00']
+	   
+	    b=math.radians(60)
+
+            y=math.tan(b)
+
+            w=self.screen['width']/2
+
+            x=d-w
+
+            #print("offset",x)
+
+            fin=math.atan(y*x/w)
+
+            #print ("final",fin)
+
+            #print("degrees",math.degrees(fin))
+
+           
+	
+             
+  
             if(area<50000 and area>30000):
 
                 x=1

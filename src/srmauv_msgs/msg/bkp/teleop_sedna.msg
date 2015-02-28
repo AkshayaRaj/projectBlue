@@ -13,3 +13,4 @@ int16 heading_setpoint
 int16 roll_setpoint
 int16 pitch_setpoint
 
+int16 sidemove_input

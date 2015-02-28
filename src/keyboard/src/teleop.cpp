@@ -6,6 +6,7 @@
 #include<sensor_msgs/Imu.h>
 #include <std_msgs/Int16.h>
 #include <tf/tf.h>
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/Pose2D.h>
 #include <srmauv_msgs/goal.h>
 #include <srmauv_msgs/line.h>
@@ -14,7 +15,7 @@ srmauv_msgs::teleop_sedna teleop;
 srmauv_msgs::depth depth;
 srmauv_msgs::line line;
 keyboard::Key key;
-
+std_msgs::Bool inLineBool;
 
 int pressure;
 double yaw,pitch,roll;
@@ -27,6 +28,7 @@ ros::Subscriber teleopSetter;
 ros::Subscriber headingSub;
 ros::Subscriber lineSub;
 ros::Publisher teleopPub;
+ros::Publisher inLinePub;
 
 int limit(int value, int lower, int upper);
 void keyUp(const keyboard::KeyConstPtr& key);
@@ -44,6 +46,7 @@ bool in_roll=false;
 bool in_pitch=false;
 bool inLine=false;
 
+
 bool shift=false;
 bool pid=false;
 //ros::NodeHandle *nh;
@@ -58,6 +61,7 @@ int main(int argc,char** argv){
   teleop.tune=false;
 teleop.depth_enable=false;
 teleop.pid_enable=false;
+inLineBool.data=false;
 
   keyDown_sub=nh.subscribe("/keyboard/keydown",1000,keyDown);
   keyUp_sub=nh.subscribe("/keyboard/keyup",1000,keyUp);
@@ -66,6 +70,7 @@ teleop.pid_enable=false;
   headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
   teleopSetter=nh.subscribe("/teleop_set",100,setTeleop);
   lineSub=nh.subscribe("/line_follower",1000,setTeleop);
+  inLinePub=nh.advertise<std_msgs::Bool>("/inLine",100);
   teleopPub=nh.advertise<srmauv_msgs::teleop_sedna>("/teleop_sedna",1000);
 
 ROS_INFO("Teleop dispatcher initialized..");
@@ -98,6 +103,7 @@ ROS_INFO("Teleop dispatcher initialized..");
 
 
 void runMission(){
+inLinePub.publish(inLineBool);
   if(inLine && line.possible){
     teleop.heading_setpoint+line.heading;
 
@@ -259,6 +265,7 @@ void keyDown(const keyboard::KeyConstPtr & key){
 
       case 108: {  // l : enable/disable lineFollower
         inLine=!inLine;
+	inLineBool.data=inLine;
         break;
       }
 
