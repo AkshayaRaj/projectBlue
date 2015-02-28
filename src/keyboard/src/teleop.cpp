@@ -45,7 +45,7 @@ bool in_yaw=false;
 bool in_roll=false;
 bool in_pitch=false;
 bool inLine=false;
-
+bool inSidemove=false;
 
 bool shift=false;
 bool pid=false;
@@ -69,7 +69,7 @@ inLineBool.data=false;
   imuSub=nh.subscribe("/imu/data",1000,getOrientation);
   headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
   teleopSetter=nh.subscribe("/teleop_set",100,setTeleop);
-  lineSub=nh.subscribe("/line_follower",1000,setTeleop);
+  lineSub=nh.subscribe("/line_follower",1000,getLine);
   inLinePub=nh.advertise<std_msgs::Bool>("/inLine",100);
   teleopPub=nh.advertise<srmauv_msgs::teleop_sedna>("/teleop_sedna",1000);
 
@@ -105,9 +105,16 @@ ROS_INFO("Teleop dispatcher initialized..");
 void runMission(){
 inLinePub.publish(inLineBool);
   if(inLine && line.possible){
-    teleop.heading_setpoint+line.heading;
-
+   // ******************* subject to change +/- : 
+    teleop.heading_setpoint=yaw + line.heading;
+    teleop.sidemove_input=line.distance;
+	if(!inSidemove)
+		teleop.sidemove_input=0;
   }
+  else
+	{
+		teleop.sidemove_input=0;
+	{
 }
 
 void getPressure(const srmauv_msgs::depth &msg){
@@ -202,6 +209,10 @@ void keyDown(const keyboard::KeyConstPtr & key){
         break;
 
       }
+      case 115 { //s : enable/disable sidemove pid
+	inSidemove=!inSidemove;
+	break;
+	}
       case 113: { //Q: dropper
         teleop.dropper=true;
         break;

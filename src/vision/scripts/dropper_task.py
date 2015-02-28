@@ -138,7 +138,9 @@ class Drops:
 
         self.image_filter_pub=rospy.Publisher("~/vision/image_filter",Image)
 
-        self.register()
+        self.line_pub=rospy.Publisher("/line_follower",line)
+
+	self.register()
 
         self.previousCentroid=(-1,-1)
 
@@ -146,7 +148,11 @@ class Drops:
 
     	self.found=False
 
-        
+     	self.lineMsg=line()
+        self.lineMsg.possible=False
+        self.lineMsg.heading=0
+        self.lineMsg.distance=0
+
 
         
 
@@ -306,6 +312,7 @@ class Drops:
         try:
 
             self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(mask_out, encoding="bgr8"))
+	    self.line_pub.publish(self.lineMsg);
 
         except CvBridgeError as e:
 
