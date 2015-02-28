@@ -285,7 +285,7 @@ int main (int argc,char **argv){
 			pidInfo.sidemove.p=sidemovePID.getProportional();
                         pidInfo.sidemove.i=sidemovePID.getIntegral();
                         pidInfo.sidemove.d=sidemovePID.getDerivative();
-			
+			pidInfo.sidemove.total=sidemove_output;	
 
 		}
 		else
@@ -447,7 +447,7 @@ double fmap(int input, int in_min, int in_max, int out_min, int out_max){
 
 
 
-void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemove_output)
+void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,double sidemovePID_output)
 {
   //write code for forward movement
 
@@ -503,13 +503,13 @@ else{
 }
 
 #ifndef REVERSE
-  double speed7_output=(-headingPID_output+teleop_velocity.sidemove+sidemove_output);
-  double speed8_output=(headingPID_output+teleop_velocity.sidemove+sidemove_output);
+  double speed7_output=(-headingPID_output+teleop_velocity.sidemove+sidemovePID_output);
+  double speed8_output=(headingPID_output+teleop_velocity.sidemove+sidemovePID_output);
 #endif
 
 #ifdef REVERSE
-  double speed7_output=(headingPID_output+teleop_velocity.sidemove+sidemove_output);
-  double speed8_output=(-headingPID_output+teleop_velocity.sidemove+sidemove_output);
+  double speed7_output=(headingPID_output+teleop_velocity.sidemove+sidemovePID_output);
+  double speed8_output=(-headingPID_output+teleop_velocity.sidemove+sidemovePID_output);
 #endif
 
 if(speed7_output<0)
