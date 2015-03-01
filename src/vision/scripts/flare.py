@@ -296,7 +296,7 @@ class Buoys:
         ch=cv2.split(enhancedImg)
 	#print "value",self.highThresh[2]
 
-        mask = cv2.inRange(ch[1],self.highThresh[2],self.lowThresh[2])
+        mask = cv2.inRange(ch[2],self.highThresh[2],self.lowThresh[2])
 
    #     mask1=cv2.inRange(ch[1],self.highThresh[0],self.lowThresh[0])
 
@@ -379,7 +379,7 @@ class Buoys:
 
             
 
-            b=math.radians(60)
+            b=math.radians(30)
 
             y=math.tan(b)
 
@@ -390,12 +390,13 @@ class Buoys:
             #print("offset",x)
 
             fin=math.atan(y*x/w)
+	    fin=math.degrees(fin)
 	    cv2.putText(self.image, str(fin), (30, 30),cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255))	
             #print ("final",fin)
 
             #print("degrees",math.degrees(fin))
 
-            self.flare_msg.heading_offset=int(math.degrees(fin))
+            self.flare_msg.heading_offset=int(fin)
 	    self.flare_msg.y_offset=self.screen['height']/2 - centroidToBump[1]
             #CENTER POINT VALUES
 
