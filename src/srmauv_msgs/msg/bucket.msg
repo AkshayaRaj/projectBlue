@@ -1,0 +1,3 @@
+bool possible
+int16 x_offset
+int16 y_offset

@@ -294,6 +294,22 @@ int main (int argc,char **argv){
 			sidemove_output=0;
 			sidemovePID.clearIntegrator();
 		}
+
+		if(inForwardPID)
+		                {
+		                        forward_output=forwardPID.computePID((double)0.0,ctrl.forward_input);
+		                        pidInfo.forward.p=forwardPID.getProportional();
+		                        pidInfo.forward.i=forwardPID.getIntegral();
+		                        pidInfo.forward.d=forwardPID.getDerivative();
+		                        pidInfo.forward.total=forward_output;
+
+
+		                }
+		                else
+		                {
+		                        forward_output=0;
+		                        forwardPID.clearIntegrator();
+		                }
 		if(inDepthPID)
 		{
 			depth_output=depthPID.computePID((double)ctrl.depth_setpoint,ctrl.depth_input)*-1;
@@ -456,8 +472,8 @@ void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,
 	double speed2_output;
 
   if(teleop_velocity.forward<0){
-	 speed1_output=(int)(thruster1_rev_ratio*teleop_velocity.forward);
-	 speed2_output=(int)(thruster2_rev_ratio*teleop_velocity.forward);
+	 speed1_output=(int)(thruster1_rev_ratio*(teleop_velocity.forward));
+	 speed2_output=(int)(thruster2_rev_ratio*(teleop_velocity.forward));
 
 }
 	else{
@@ -651,6 +667,11 @@ void callback(controller::controllerConfig &config, uint32_t level) {
         sidemovePID.setTi(config.sidemove_Ti);
         sidemovePID.setActuatorSatModel(config.sidemove_min,config.sidemove_max);
 
+        forwardPID.setKp(config.forward_Kp);
+        forwardPID.setTd(config.forward_Td);
+        forwardPID.setTi(config.forward_Ti);
+        forwardPID.setActuatorSatModel(config.forward_min,config.forward_max);
+
      //   forwardPID.setKp(config.forward_Kp);
      //   forwardPID.setTd(config.forward_Td);
      //   forwardPID.setTi(config.forward_Ti);
@@ -678,12 +699,17 @@ void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
    inHeadingPID=inPitchPID=inRollPID=msg->pid_enable;
 	//inSidemovePID=true; /// this might not be a good idea.. but sidemove pid is always on 
 	ctrl.sidemove_input=msg->sidemove_input;   // if not using sidemove make sidemove_input = 0
-	
+	ctrl.forward_input=msg->forward_input;
 	if(msg->sidemove_input==0)
 		inSidemovePID=false;
 	else
 		inSidemovePID=true;
-	
+	if(msg->forward_input==0)
+	                inForwardPID=false;
+	        else
+	                inForwardPID=true;
+
+	        }
  	}
 
 }

@@ -63,6 +63,7 @@ geometry_msgs
 	goal.msg
 	line.msg
 	flare.msg
+	bucket.msg
  )
 
 ## Generate services in the 'srv' folder

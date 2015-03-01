@@ -1,3 +1,6 @@
+// teleop.heading_setpoint in runMission for bucket can be set to EAST  !
+
+
 #define NORTH 109
 #define DEPTH_SAUVC 315
 #define DEPTH_BUCKET 334
@@ -15,15 +18,19 @@
 #include <srmauv_msgs/goal.h>
 #include <srmauv_msgs/line.h>
 #include <srmauv_msgs/flare.h>
+#include <srmauv_msgs/bucket.h>
 
 
 srmauv_msgs::teleop_sedna teleop;
 srmauv_msgs::depth depth;
 srmauv_msgs::line line;
 srmauv_msgs::flare flare;
+srmauv_msgs::bucket bucket;
 keyboard::Key key;
 std_msgs::Bool inLineBool;
 std_msgs::Bool inFlareBool;
+std_msgs::Bool inBucketBool;
+
 int pressure;
 double yaw,pitch,roll;
 
@@ -35,13 +42,15 @@ ros::Subscriber teleopSetter;
 ros::Subscriber headingSub;
 ros::Subscriber lineSub;
 ros::Subscriber flareSub;
+ros::Subscriber bucketSub;
 ros::Publisher teleopPub;
 ros::Publisher inLinePub;
 ros::Publisher inFlarePub;
+ros::Publisher inBucketPub;
 
 
 int north = NORTH;
-int south= NORTH+180;
+int south= NORTH-180;
 int east = NORTH+90;
 int west = NORTH- 90 ;
 
@@ -56,13 +65,18 @@ void setCurrent();
 void runMission();
 void getLine(const srmauv_msgs::line::ConstPtr&msg);
 void getFlare(const srmauv_msgs::flare::ConstPtr&msg);
+void getBucket(const srmauv_msgs::bucket::ConstPtr&msg);
+
 bool in_depth=false;
 bool in_yaw=false;
 bool in_roll=false;
 bool in_pitch=false;
 bool inLine=false;
 bool inFlare=false;
+bool inBucket=false;
+
 bool inSidemove=false;
+bool inForward=false;
 
 bool shift=false;
 bool pid=false;
@@ -80,8 +94,9 @@ int main(int argc,char** argv){
   teleop.pid_enable=false;
   inLineBool.data=false;
   inFlareBool.data=false;
-	teleop.depth_setpoint=DEPTH_SAUVC;
-	teleop.heading_setpoint=north;
+  inBucketBool.data=false;
+  teleop.depth_setpoint=DEPTH_SAUVC;
+  teleop.heading_setpoint=north;
 	
   keyDown_sub=nh.subscribe("/keyboard/keydown",1000,keyDown);
   keyUp_sub=nh.subscribe("/keyboard/keyup",1000,keyUp);
@@ -91,9 +106,11 @@ int main(int argc,char** argv){
   teleopSetter=nh.subscribe("/teleop_set",1000,setTeleop);
   lineSub=nh.subscribe("/line_follower",1000,getLine);
   flareSub=nh.subscribe("/flare",1000,getFlare);
+  bucketSub=nh.subscribe("/bucket",1000,getBucket);
 	
   inLinePub=nh.advertise<std_msgs::Bool>("/inLine",100);
   inFlarePub=nh.advertise<std_msgs::Bool>("/inFlare",100);
+  inBucketPub=nh.advertise<std_msgs::Bool>("/inBucket",100);
 
   teleopPub=nh.advertise<srmauv_msgs::teleop_sedna>("/teleop_sedna",1000);
 
@@ -129,6 +146,7 @@ ROS_INFO("Teleop dispatcher initialized..");
 void runMission(){
 inLinePub.publish(inLineBool);
 inFlarePub.publish(inFlareBool);
+inBucketPub.publish(inBucketBool);
   if(inLine && line.possible){
    // ******************* subject to change +/- : 
     teleop.heading_setpoint=yaw + line.heading;
@@ -146,6 +164,16 @@ inFlarePub.publish(inFlareBool);
 	teleop.heading_setpoint=yaw+flare.heading_offset;
 	teleop.depth_setpoint=DEPTH_FLARE;
 }
+
+ if(inBucket && bucket.possible && !inLine && !inFlare){
+     teleop.forward_input=bucket.y_offset;
+     teleop.sidemove_input=bucket.x_offset;
+ }
+ else{
+
+        teleop.forward_input=0;
+        teleop.sidemove_input=0;
+ }
 
 }
 
@@ -173,6 +201,12 @@ void getFlare(const srmauv_msgs::flare::ConstPtr&msg){
 	flare.possible=msg->possible;
 	flare.heading_offset=msg->heading_offset;
 	flare.y_offset=msg->y_offset;
+}
+
+void getBucket(const srmauv_msgs::bucket::ConstPtr&msg){
+  bucket.possible=msg->possible;
+  bucket.x_offset=msg->x_offset;
+  bucket.y_offset=msg->y_offset;
 }
 
 
@@ -335,6 +369,14 @@ void keyDown(const keyboard::KeyConstPtr & key){
         inLine=!inLine;
 	inLineBool.data=inLine;
 	inSidemove=!inSidemove;
+        break;
+      }
+
+      case 98:{ // b : enable/disable bucket detector
+        inBucket=!inBucket;
+        inBucketBool.data=inBucket;
+        inSidemove=!inSidemove;
+        inForward=!inForward;
         break;
       }
 	case 102 : { //f enable disable flare
