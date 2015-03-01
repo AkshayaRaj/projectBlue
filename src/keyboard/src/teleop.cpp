@@ -62,7 +62,9 @@ int main(int argc,char** argv){
 teleop.depth_enable=false;
 teleop.pid_enable=false;
 inLineBool.data=false;
-
+	teleop.depth_setpoint=334;
+	teleop.heading_setpoint=109;
+	
   keyDown_sub=nh.subscribe("/keyboard/keydown",1000,keyDown);
   keyUp_sub=nh.subscribe("/keyboard/keyup",1000,keyUp);
   pressureSub=nh.subscribe("/pressure_data",1000,getPressure);
@@ -145,7 +147,7 @@ void setCurrent(){
         teleop.reverse_speed=0;
 }
 
-void setTeleop(const srmauv_msgs::goal::ConstPtr& msg){
+void setTeleop(const srmauv_msgs::goal::ConstPtr &msg){
   if(msg->goDepth==true)
     teleop.depth_setpoint=msg->depth;
   if(msg->goHeading)

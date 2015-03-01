@@ -175,7 +175,7 @@ class Drops:
 
   #      self.blur=config['blur']
 
-        
+	print "Reconfigured woo hoo"        
 
         return config
 
@@ -223,6 +223,10 @@ class Drops:
 
             centroidy = mu['m01'] / mu['m00']
 	   
+	    
+	    self.lineMsg.distance=int(centroidx - self.screen['width']/2)
+	    self.lineMsg.heading=int(centroidy - self.screen['height']/2)
+	    '''		
 	    b=math.radians(60)
 
             y=math.tan(b)
@@ -239,7 +243,7 @@ class Drops:
 
             #print("degrees",math.degrees(fin))
 
-           
+            '''	
 	
              
   
@@ -248,7 +252,10 @@ class Drops:
                 x=1
 
                 print bool(x)
-
+		self.lineMsg.possible=True
+	    
+            else :
+		self.lineMsg.possible=False		
 
 
     

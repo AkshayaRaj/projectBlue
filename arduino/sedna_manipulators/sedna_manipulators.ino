@@ -75,6 +75,7 @@ void initMan(){
   
 void initTopics(){
         nh.subscribe(emergency_sub);
+        nh.subscribe(dropper_sub);
 
 }
 
@@ -130,13 +131,18 @@ void torpedoCallback(const std_msgs::Bool &msg){
 }
 
 void dropperCallback(const std_msgs::Bool &msg){
-   if(msg.data==true && dropperArmed==true){
+   if(msg.data==true ){
      /*
      digitalWrite(DROPPER,LOW);
      delay(500);
      digitalWrite(DROPPER,HIGH);
      dropperArmed=false;
      */
+       
+       blink(0,0,255,3);
+       digitalWrite(DROPPER,LOW);
+       delay(3000);
+       digitalWrite(DROPPER,HIGH);
   
 }
 }
