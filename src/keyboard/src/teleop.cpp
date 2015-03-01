@@ -1,7 +1,7 @@
 #define NORTH 109
 #define DEPTH_SAUVC 315
 #define DEPTH_BUCKET 334
-
+#define DEPTH_FLARE 334
 #include <srmauv_msgs/teleop_sedna.h>
 #include <ros/ros.h>
 #include<keyboard/Key.h>
@@ -23,7 +23,7 @@ srmauv_msgs::line line;
 srmauv_msgs::flare flare;
 keyboard::Key key;
 std_msgs::Bool inLineBool;
-
+std_msgs::Bool inFlareBool;
 int pressure;
 double yaw,pitch,roll;
 
@@ -37,6 +37,8 @@ ros::Subscriber lineSub;
 ros::Subscriber flareSub;
 ros::Publisher teleopPub;
 ros::Publisher inLinePub;
+ros::Publisher inFlarePub;
+
 
 int north = NORTH;
 int south= NORTH+180;
@@ -59,6 +61,7 @@ bool in_yaw=false;
 bool in_roll=false;
 bool in_pitch=false;
 bool inLine=false;
+bool inFlare=false;
 bool inSidemove=false;
 
 bool shift=false;
@@ -73,9 +76,10 @@ int main(int argc,char** argv){
 
   teleop.enable=true;
   teleop.tune=false;
-teleop.depth_enable=false;
-teleop.pid_enable=false;
-inLineBool.data=false;
+  teleop.depth_enable=false;
+  teleop.pid_enable=false;
+  inLineBool.data=false;
+  inFlareBool.data=false;
 	teleop.depth_setpoint=DEPTH_SAUVC;
 	teleop.heading_setpoint=north;
 	
@@ -89,6 +93,8 @@ inLineBool.data=false;
   flareSub=nh.subscribe("/flare",1000,getFlare);
 	
   inLinePub=nh.advertise<std_msgs::Bool>("/inLine",100);
+  inFlarePub=nh.advertise<std_msgs::Bool>("/inFlare",100);
+
   teleopPub=nh.advertise<srmauv_msgs::teleop_sedna>("/teleop_sedna",1000);
 
 ROS_INFO("Teleop dispatcher initialized..");
@@ -122,6 +128,7 @@ ROS_INFO("Teleop dispatcher initialized..");
 
 void runMission(){
 inLinePub.publish(inLineBool);
+inFlarePub.publish(inFlareBool);
   if(inLine && line.possible){
    // ******************* subject to change +/- : 
     teleop.heading_setpoint=yaw + line.heading;
@@ -133,6 +140,13 @@ inLinePub.publish(inLineBool);
 	{
 		teleop.sidemove_input=0;
 	}
+
+
+ if (inFlare && flare.possible && !inLine){
+	teleop.heading_setpoint=yaw+flare.heading_offset;
+	teleop.depth_setpoint=DEPTH_FLARE;
+}
+
 }
 
 void getPressure(const srmauv_msgs::depth &msg){
@@ -253,7 +267,7 @@ void keyDown(const keyboard::KeyConstPtr & key){
 
       }
       case 115 : { //s : enable/disable sidemove pid
-	inSidemove=!inSidemove;
+//	inSidemove=!inSidemove;
 	break;
 	}
       case 113: { //Q: dropper
@@ -320,8 +334,15 @@ void keyDown(const keyboard::KeyConstPtr & key){
       case 108: {  // l : enable/disable lineFollower
         inLine=!inLine;
 	inLineBool.data=inLine;
+	inSidemove=!inSidemove;
         break;
       }
+	case 102 : { //f enable disable flare
+		inFlare=!inFlare;
+		inFlareBool.data=inFlare;
+		inLine=false;
+		break;
+	}
 
   }
 

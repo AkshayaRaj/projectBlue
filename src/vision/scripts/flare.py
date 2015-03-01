@@ -266,7 +266,7 @@ class Buoys:
 	'''
 
 
-
+	self.image=cv_image.copy()
         channels=cv2.split(cv_image)
 
         channels[0] = cv2.equalizeHist(channels[0])
@@ -307,7 +307,7 @@ class Buoys:
 #	mas2=mask2.copy()	
 
         #ADDED
-
+	mask_out=cv2.cvtColor(mask,cv2.COLOR_GRAY2BGR)
         self.cir(mas,cv_image)
 	
 #        self.cir(mas1)
@@ -322,13 +322,13 @@ class Buoys:
 
         #cv2.imshow(mask2)
 
-        mask_out=cv2.cvtColor(mask,cv2.COLOR_GRAY2BGR)
+       # mask_out=cv2.cvtColor(mask,cv2.COLOR_GRAY2BGR)
 #	mask_out1=cv2.cvtColor(mas1,cv2.COLOR_GRAY2BGR)
 #	mask_out2=cv2.cvtColor(mas2,cv2.COLOR_GRAY2BGR)
 #	mask_out3=cv2.cvtColor(mask,cv2.COLOR_GRAY2BGR)
         try:
 
-            self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, encoding="bgr8"))
+            self.image_filter_pub.publish(self.bridge.cv2_to_imgmsg(self.image, encoding="bgr8"))
 	    self.image_1_pub.publish(self.bridge.cv2_to_imgmsg(mask_out, encoding="bgr8"))
 	    self.flare_pub.publish(self.flare_msg);
 	  #  self.image_2_pub.publish(self.bridge.cv2_to_imgmsg(mask_out2, encoding="bgr8"))
@@ -373,7 +373,7 @@ class Buoys:
 
             d=(int(mu['m10']/muArea))
 
-	    cv2.circle(cv_image,centroidToBump,2,(0,255,0),3)
+	    cv2.circle(self.image,centroidToBump,2,(0,255,0),3)
 
             #for yaw value
 
@@ -390,7 +390,7 @@ class Buoys:
             #print("offset",x)
 
             fin=math.atan(y*x/w)
-
+	    cv2.putText(self.image, str(fin), (30, 30),cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255))	
             #print ("final",fin)
 
             #print("degrees",math.degrees(fin))
