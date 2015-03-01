@@ -1,3 +1,7 @@
+#define NORTH 109
+#define DEPTH_SAUVC 315
+#define DEPTH_BUCKET 334
+
 #include <srmauv_msgs/teleop_sedna.h>
 #include <ros/ros.h>
 #include<keyboard/Key.h>
@@ -10,10 +14,13 @@
 #include <geometry_msgs/Pose2D.h>
 #include <srmauv_msgs/goal.h>
 #include <srmauv_msgs/line.h>
+#include <srmauv_msgs/flare.h>
+
 
 srmauv_msgs::teleop_sedna teleop;
 srmauv_msgs::depth depth;
 srmauv_msgs::line line;
+srmauv_msgs::flare flare;
 keyboard::Key key;
 std_msgs::Bool inLineBool;
 
@@ -27,8 +34,14 @@ ros::Subscriber imuSub;
 ros::Subscriber teleopSetter;
 ros::Subscriber headingSub;
 ros::Subscriber lineSub;
+ros::Subscriber flareSub;
 ros::Publisher teleopPub;
 ros::Publisher inLinePub;
+
+int north = NORTH;
+int south= NORTH+180;
+int east = NORTH+90;
+int west = NORTH- 90 ;
 
 int limit(int value, int lower, int upper);
 void keyUp(const keyboard::KeyConstPtr& key);
@@ -40,6 +53,7 @@ void setTeleop(const srmauv_msgs::goal::ConstPtr& msg);
 void setCurrent();
 void runMission();
 void getLine(const srmauv_msgs::line::ConstPtr&msg);
+void getFlare(const srmauv_msgs::flare::ConstPtr&msg);
 bool in_depth=false;
 bool in_yaw=false;
 bool in_roll=false;
@@ -57,13 +71,13 @@ int main(int argc,char** argv){
  ros::NodeHandle nh;
 
 
-  teleop.enable=false;
+  teleop.enable=true;
   teleop.tune=false;
 teleop.depth_enable=false;
 teleop.pid_enable=false;
 inLineBool.data=false;
-	teleop.depth_setpoint=334;
-	teleop.heading_setpoint=109;
+	teleop.depth_setpoint=DEPTH_SAUVC;
+	teleop.heading_setpoint=north;
 	
   keyDown_sub=nh.subscribe("/keyboard/keydown",1000,keyDown);
   keyUp_sub=nh.subscribe("/keyboard/keyup",1000,keyUp);
@@ -72,6 +86,8 @@ inLineBool.data=false;
   headingSub=nh.subscribe("/imu/HeadingTrue_degree",1000,getHeading);
   teleopSetter=nh.subscribe("/teleop_set",1000,setTeleop);
   lineSub=nh.subscribe("/line_follower",1000,getLine);
+  flareSub=nh.subscribe("/flare",1000,getFlare);
+	
   inLinePub=nh.advertise<std_msgs::Bool>("/inLine",100);
   teleopPub=nh.advertise<srmauv_msgs::teleop_sedna>("/teleop_sedna",1000);
 
@@ -139,6 +155,13 @@ void getLine(const srmauv_msgs::line::ConstPtr&msg){
   line.distance=msg->distance;
 }
 
+void getFlare(const srmauv_msgs::flare::ConstPtr&msg){
+	flare.possible=msg->possible;
+	flare.heading_offset=msg->heading_offset;
+	flare.y_offset=msg->y_offset;
+}
+
+
 void setCurrent(){
   teleop.depth_setpoint=depth.depth;
         teleop.heading_setpoint=yaw;
@@ -200,6 +223,24 @@ void keyDown(const keyboard::KeyConstPtr & key){
      //   ROS_INFO("Setpoints Updated ! -> Depth: %d\tHeading :%d ",teleop.depth_setpoint,(int)teleop.heading_setpoint );
         break;
       }
+	case 49:{
+		teleop.heading_setpoint=north;
+		break;
+	}
+	case 50:{
+                teleop.heading_setpoint=east;
+                break;
+        }
+	case 51:{
+                teleop.heading_setpoint=west;
+                break;
+        }
+	case 52:{
+                teleop.heading_setpoint=south;
+                break;
+        }
+
+
 
 
       case 45 : {  // -
