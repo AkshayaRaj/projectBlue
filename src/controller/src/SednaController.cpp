@@ -471,14 +471,14 @@ void setHorizontalThrustSpeed(double headingPID_output,double forwardPID_output,
 	double speed1_output;
 	double speed2_output;
 
-  if(teleop_velocity.forward<0){
-	 speed1_output=(int)(thruster1_rev_ratio*(teleop_velocity.forward));
-	 speed2_output=(int)(thruster2_rev_ratio*(teleop_velocity.forward));
+  if(teleop_velocity.forward + forwardPID_output<0){
+	 speed1_output=(int)(thruster1_rev_ratio*(teleop_velocity.forward+ forwardPID_output));
+	 speed2_output=(int)(thruster2_rev_ratio*(teleop_velocity.forward +forwardPID_output));
 
 }
 	else{
-   speed1_output=(int)(thruster1_ratio*(teleop_velocity.forward));
-   speed2_output=(int)(thruster2_ratio*(teleop_velocity.forward));
+   speed1_output=(int)(thruster1_ratio*(teleop_velocity.forward +forwardPID_output));
+   speed2_output=(int)(thruster2_ratio*(teleop_velocity.forward +forwardPID_output));
 }
 
 	
@@ -709,7 +709,7 @@ void getTeleop(const srmauv_msgs::teleop_sedna::ConstPtr &msg){
 	        else
 	                inForwardPID=true;
 
-	        }
+
  	}
 
 }

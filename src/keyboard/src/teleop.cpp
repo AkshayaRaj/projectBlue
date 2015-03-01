@@ -30,6 +30,7 @@ keyboard::Key key;
 std_msgs::Bool inLineBool;
 std_msgs::Bool inFlareBool;
 std_msgs::Bool inBucketBool;
+std_msgs::Bool dropBall;
 
 int pressure;
 double yaw,pitch,roll;
@@ -47,6 +48,7 @@ ros::Publisher teleopPub;
 ros::Publisher inLinePub;
 ros::Publisher inFlarePub;
 ros::Publisher inBucketPub;
+ros::Publisher dropperPub;
 
 
 int north = NORTH;
@@ -97,6 +99,7 @@ int main(int argc,char** argv){
   inBucketBool.data=false;
   teleop.depth_setpoint=DEPTH_SAUVC;
   teleop.heading_setpoint=north;
+  dropBall.data=false;
 	
   keyDown_sub=nh.subscribe("/keyboard/keydown",1000,keyDown);
   keyUp_sub=nh.subscribe("/keyboard/keyup",1000,keyUp);
@@ -111,7 +114,7 @@ int main(int argc,char** argv){
   inLinePub=nh.advertise<std_msgs::Bool>("/inLine",100);
   inFlarePub=nh.advertise<std_msgs::Bool>("/inFlare",100);
   inBucketPub=nh.advertise<std_msgs::Bool>("/inBucket",100);
-
+  dropperPub=nh.advertise<std_msgs::Bool>("/dropper",100);
   teleopPub=nh.advertise<srmauv_msgs::teleop_sedna>("/teleop_sedna",1000);
 
 ROS_INFO("Teleop dispatcher initialized..");
@@ -147,6 +150,7 @@ void runMission(){
 inLinePub.publish(inLineBool);
 inFlarePub.publish(inFlareBool);
 inBucketPub.publish(inBucketBool);
+dropperPub.publish(dropBall);
   if(inLine && line.possible){
    // ******************* subject to change +/- : 
     teleop.heading_setpoint=yaw + line.heading;
@@ -168,6 +172,10 @@ inBucketPub.publish(inBucketBool);
  if(inBucket && bucket.possible && !inLine && !inFlare){
      teleop.forward_input=bucket.y_offset;
      teleop.sidemove_input=bucket.x_offset;
+     if(!inSidemove)
+                     teleop.sidemove_input=0;
+     if(!inForward)
+                     teleop.forward_input=0;
  }
  else{
 
@@ -287,6 +295,13 @@ void keyDown(const keyboard::KeyConstPtr & key){
                 teleop.heading_setpoint=south;
                 break;
         }
+
+	case 120 : { //x : drop ball !
+	  dropBall.data=true;
+	  dropperPub.publish(dropBall);
+	  dropBall.data=false;
+	  break;
+	}
 
 
 
